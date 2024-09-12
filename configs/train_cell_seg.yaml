@@ -128,7 +128,7 @@ loaders:
   val:
     # path to the val datasets
     file_paths:
-      - /home/mali2/datasets/CellSeg/train/hd5_files_cell
+      - /home/mali2/datasets/CellSeg/val/hd5_files_cell
 
     # SliceBuilder configuration, i.e. how to iterate over the input volume patch-by-patch
     slice_builder:
