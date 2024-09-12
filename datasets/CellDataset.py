@@ -9,7 +9,7 @@ import numpy as np
 
 class CellDataset(Dataset):
     def __init__(self, 
-                 data_path = '/home/mali2/datasets/vital_signs',
+                 data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
                  is_train = True):
 
         self.root_folder = data_path        
@@ -46,12 +46,23 @@ class CellDataset(Dataset):
         mask = np.zeros(img.shape)
         mask[0, :, :, :] = img[0, :, :, :]
         return mask > 0
+    
+    def get_labels(self, img):
+        tub_mask = self.get_tub_mask(img)
+        mito_mask = self.get_mito_mask(img)
 
+        labels = np.zeros(img.shape)
+
+        labels[tub_mask.nonzero()] = 1
+        labels[mito_mask.nonzero()] = 2
+    
+        return labels
+    
     def __getitem__(self, index):
         img_path = self.image_paths[index]
         
         img = tifffile.imread(img_path)
-        img = np.transpose(img, (1, 2, 3, 0))
+        img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         img = (img / 256).round()
 
-        return img, self.get_tub_mask(img), self.get_mito_mask(img)
+        return img, self.get_labels(img)
