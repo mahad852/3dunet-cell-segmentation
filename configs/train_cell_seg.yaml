@@ -55,13 +55,13 @@ trainer:
   # path to the best_checkpoint.pytorch; to be used for fine-tuning the model with additional ground truth
   pre_trained: null
   # how many iterations between validations
-  validate_after_iters: 1000
+  validate_after_iters: 50
   # how many iterations between tensorboard logging
-  log_after_iters: 500
+  log_after_iters: 100
   # max number of epochs
-  max_num_epochs: 1000
+  max_num_epochs: 100
   # max number of iterations
-  max_num_iterations: 150000
+  max_num_iterations: 500
 # Configure training and validation loaders
 loaders:
   # how many subprocesses to use for data loading
