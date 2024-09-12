@@ -38,20 +38,16 @@ class CellDataset(Dataset):
             raise ValueError(error_msg)
         
     def get_mito_mask(self, img):
-        mask = np.zeros(img.shape)
-        mask[1, :, :, :] = img[1, :, :, :]
-        return mask > 0
+        return img[1] > 10
     
     def get_tub_mask(self, img):
-        mask = np.zeros(img.shape)
-        mask[0, :, :, :] = img[0, :, :, :]
-        return mask > 0
+        return img[0] > 10
     
     def get_labels(self, img):
         tub_mask = self.get_tub_mask(img)
         mito_mask = self.get_mito_mask(img)
 
-        labels = np.zeros(img.shape)
+        labels = np.zeros(tub_mask.shape)
 
         labels[tub_mask.nonzero()] = 1
         labels[mito_mask.nonzero()] = 2
