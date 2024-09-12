@@ -50,8 +50,8 @@ class CellDataset(Dataset):
         labels = np.zeros(img.shape)
         print(labels.shape)
 
-        labels[0, tub_mask.nonzero()] = 1
-        labels[1, mito_mask.nonzero()] = 2
+        labels[0][tub_mask.nonzero()] = 1
+        labels[1][mito_mask.nonzero()] = 2
         
         return labels
     
