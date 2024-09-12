@@ -1,29 +1,47 @@
-# Sample configuration file for training a 3D U-Net on a task of predicting the boundaries in 3D stack of the Arabidopsis
-# ovules acquired with the confocal microscope. Training done with a combination of Binary Cross-Entropy and DiceLoss.
-# Download train data from: https://osf.io/x9yns/
-# Download validation data from: https://osf.io/xp5uf/
-# Download test data from: https://osf.io/8jz7e/
+# Sample configuration file for training a 3D U-Net on a multiclass semantic segmentation task.
+
+# model configuration
 model:
+  # model class, e.g. UNet3D, ResidualUNet3D
   name: UNet3D
   # number of input channels to the model
   in_channels: 2
-  # number of output channels
+  # number of classes
   out_channels: 3
-  # determines the order of operators in a single layer (crg - Conv3d+ReLU+GroupNorm)
+  # determines the order of operators in a single layer (gcr - GroupNorm+Conv3d+ReLU)
   layer_order: gcr
-  # initial number of feature maps
-  f_maps: 32
+  # number of features at each level of the U-Net
+  f_maps: [ 32, 64, 128, 256 ]
   # number of groups in the groupnorm
   num_groups: 8
-  # apply element-wise nn.Sigmoid after the final 1x1x1 convolution, otherwise apply nn.Softmax
-  final_sigmoid: true
-# loss function to be used during training
+  # apply element-wise nn.Sigmoid after the final 1x1 convolution, otherwise apply nn.Softmax (in this case softmax)
+  final_sigmoid: false
+  # if True applies the final normalization layer (sigmoid or softmax), otherwise the networks returns the output from the final convolution layer; use False for regression problems, e.g. de-noising
+  is_segmentation: true
+# trainer configuration
+trainer:
+  # path to the checkpoint directory
+  checkpoint_dir: CHECKPOINT_DIR
+  # path to the latest checkpoint; if provided the training will be resumed from that checkpoint
+  resume: null
+  # path to the best_checkpoint.pytorch; to be used for fine-tuning the model with additional ground truth
+  # make sure to decrease the learning rate in the optimizer config accordingly
+  pre_trained: null
+  # how many iterations between validations
+  validate_after_iters: 1000
+  # how many iterations between tensorboard logging
+  log_after_iters: 500
+  # max number of epochs
+  max_num_epochs: 200
+  # max number of iterations
+  max_num_iterations: 60000
+  # model with higher eval score is considered better
+  eval_score_higher_is_better: True
+# loss function configuration
 loss:
+  # use BCE loss for training
   name: CrossEntropyLoss
-  # a target value that is ignored and does not contribute to the input gradient
-  ignore_index: null
-  # skip the last channel in the target (i.e. when last channel contains data not relevant for the loss)
-  skip_last_target: true
+# optimizer configuration
 optimizer:
   # initial learning rate
   learning_rate: 0.0002
@@ -31,48 +49,36 @@ optimizer:
   weight_decay: 0.00001
 # evaluation metric
 eval_metric:
-  # use AdaptedRandError metric
-  name: BoundaryAdaptedRandError
-  # probability maps threshold
-  threshold: 0.4
-  # use the last target channel to compute the metric
-  use_last_target: true
-  # use only the first channel for computing the metric
-  use_first_input: true
+  # use average precision metric
+  name: MeanIoU
+# learning rate scheduler configuration
 lr_scheduler:
+  # reduce learning rate when evaluation metric plateaus
   name: ReduceLROnPlateau
-  # make sure to use the 'min' mode cause lower AdaptedRandError is better
-  mode: min
-  factor: 0.5
-  patience: 30
-trainer:
-  # model with lower eval score is considered better
-  eval_score_higher_is_better: False
-  # path to the checkpoint directory
-  checkpoint_dir: ./checkpoints
-  # path to latest checkpoint; if provided the training will be resumed from that checkpoint
-  resume: null
-  # path to the best_checkpoint.pytorch; to be used for fine-tuning the model with additional ground truth
-  pre_trained: null
-  # how many iterations between validations
-  validate_after_iters: 50
-  # how many iterations between tensorboard logging
-  log_after_iters: 100
-  # max number of epochs
-  max_num_epochs: 100
-  # max number of iterations
-  max_num_iterations: 500
-# Configure training and validation loaders
+  # use 'max' if eval_score_higher_is_better=True, 'min' otherwise
+  mode: max
+  # factor by which learning rate will be reduced
+  factor: 0.2
+  # number of *validation runs* with no improvement after which learning rate will be reduced
+  patience: 8
+
+# data loaders configuration
 loaders:
+  # class of the HDF5 dataset, currently StandardHDF5Dataset and LazyHDF5Dataset are supported.
+  dataset: StandardHDF5Dataset
+  # batch dimension; if number of GPUs is N > 1, then a batch_size of N * batch_size will automatically be taken for DataParallel
+  batch_size: 1
   # how many subprocesses to use for data loading
   num_workers: 8
   # path to the raw data within the H5
-  raw_internal_path: /raw
-  # path to the the label data withtin the H5
-  label_internal_path: /label
+  raw_internal_path: raw
+  # path to the label data within the H5
+  label_internal_path: label
+  # path to the pixel-wise weight map withing the H5 if present
+  weight_internal_path: null
   # configuration of the train loader
   train:
-    # path to the training datasets
+    # paths to the training datasets
     file_paths:
       - /home/mali2/datasets/CellSeg/train/hd5_files_cell
 
@@ -84,28 +90,26 @@ loaders:
       # train stride between patches
       stride_shape: [20, 40, 40]
       # minimum volume of the labels in the patch
-      threshold: 0.6
+      threshold: 0.01
       # probability of accepting patches which do not fulfil the threshold criterion
       slack_acceptance: 0.01
 
     transformer:
       raw:
+        # subtract mean and divide by std dev
         - name: Standardize
+        # randomly flips the volume in one of the axis
         - name: RandomFlip
+        # randomly rotates the volume with 90 deg across a randomly chosen plane
         - name: RandomRotate90
         - name: RandomRotate
           # rotate only in ZY plane due to anisotropy
-          axes: [[2, 1]]
-          angle_spectrum: 45
+          axes: [ [ 2, 1 ] ]
+          # rotates by choosing random angle from [-30, 30] deg
+          angle_spectrum: 30
           mode: reflect
         - name: ElasticDeformation
           spline_order: 3
-        - name: GaussianBlur3D
-          execution_probability: 0.5
-        - name: AdditiveGaussianNoise
-          execution_probability: 0.2
-        - name: AdditivePoissonNoise
-          execution_probability: 0.2
         - name: ToTensor
           expand_dims: true
       label:
@@ -113,20 +117,19 @@ loaders:
         - name: RandomRotate90
         - name: RandomRotate
           # rotate only in ZY plane due to anisotropy
-          axes: [[2, 1]]
-          angle_spectrum: 45
+          axes: [ [ 2, 1 ] ]
+          angle_spectrum: 30
           mode: reflect
         - name: ElasticDeformation
           spline_order: 0
-        - name: StandardLabelToBoundary
-          # append original ground truth labels to the last channel (to be able to compute the eval metric)
-          append_label: true
+          # convert target volume to binary mask
         - name: ToTensor
           expand_dims: false
+          dtype: long
 
   # configuration of the val loader
   val:
-    # path to the val datasets
+    # paths to the val datasets
     file_paths:
       - /home/mali2/datasets/CellSeg/val/hd5_files_cell
 
@@ -138,7 +141,7 @@ loaders:
       # train stride between patches
       stride_shape: [20, 170, 170]
       # minimum volume of the labels in the patch
-      threshold: 0.6
+      threshold: 0.01
       # probability of accepting patches which do not fulfil the threshold criterion
       slack_acceptance: 0.01
 
@@ -149,7 +152,6 @@ loaders:
         - name: ToTensor
           expand_dims: true
       label:
-        - name: StandardLabelToBoundary
-          append_label: true
         - name: ToTensor
           expand_dims: false
+          dtype: long
