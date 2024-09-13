@@ -52,10 +52,10 @@ class CellDataset(Dataset):
         tub_mask = self.get_tub_mask(img)
         mito_mask = self.get_mito_mask(img)
 
-        labels = np.zeros(shape=(1, *tub_mask.shape), dtype=np.long)
+        labels = np.zeros(tub_mask.shape, dtype=np.long)
         
         # labels[tub_mask.nonzero()] = 1
-        labels[0][mito_mask.nonzero()] = 1
+        labels[mito_mask.nonzero()] = 1
         return labels
     
     def __getitem__(self, index):
