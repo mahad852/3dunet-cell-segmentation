@@ -45,6 +45,7 @@ trainer:
 loss:
   # use BCE loss for training
   name: BCEWithLogitsLoss
+  skip_last_target: true
 # optimizer configuration
 optimizer:
   # initial learning rate
