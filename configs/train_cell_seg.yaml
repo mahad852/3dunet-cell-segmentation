@@ -7,7 +7,7 @@ model:
   # number of input channels to the model
   in_channels: 2
   # number of classes
-  out_channels: 3
+  out_channels: 1
   # determines the order of operators in a single layer (gcr - GroupNorm+Conv3d+ReLU)
   layer_order: gcr
   # number of features at each level of the U-Net
@@ -40,8 +40,8 @@ trainer:
 # loss function configuration
 loss:
   # use BCE loss for training
-  name: CrossEntropyLoss
-  weight: [0, 0.5, 0.5]
+  name: BCEWithLogitsLoss
+  # weight: [0, 0.5, 0.5]
 # optimizer configuration
 optimizer:
   # initial learning rate
@@ -51,7 +51,8 @@ optimizer:
 # evaluation metric
 eval_metric:
   # use average precision metric
-  name: MeanIoU
+  name: BlobsAveragePrecision
+  metric: 'ap'
 # learning rate scheduler configuration
 lr_scheduler:
   # reduce learning rate when evaluation metric plateaus

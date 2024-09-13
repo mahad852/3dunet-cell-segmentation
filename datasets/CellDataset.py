@@ -8,6 +8,8 @@ import skimage.io
 
 import numpy as np
 
+from skimage.filters import threshold_otsu
+
 class CellDataset(Dataset):
     def __init__(self, 
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
@@ -39,19 +41,21 @@ class CellDataset(Dataset):
             raise ValueError(error_msg)
         
     def get_mito_mask(self, img):
-        return img[1] > 10
+        threshold = threshold_otsu(img[1])
+        return img[1] > threshold
     
     def get_tub_mask(self, img):
-        return img[0] > 10
+        threshold = threshold_otsu(img[0])
+        return img[0] > threshold
     
     def get_labels(self, img):
         tub_mask = self.get_tub_mask(img)
         mito_mask = self.get_mito_mask(img)
 
         labels = np.zeros(tub_mask.shape)
-
-        labels[tub_mask.nonzero()] = 1
-        labels[mito_mask.nonzero()] = 2
+        
+        # labels[tub_mask.nonzero()] = 1
+        labels[mito_mask.nonzero()] = 1
     
         return labels
     
