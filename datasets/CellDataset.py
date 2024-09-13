@@ -55,7 +55,7 @@ class CellDataset(Dataset):
         labels = np.zeros(shape=(1, *tub_mask.shape))
         
         # labels[tub_mask.nonzero()] = 1
-        labels[1][mito_mask.nonzero()] = 1
+        labels[0][mito_mask.nonzero()] = 1
     
         return labels
     
