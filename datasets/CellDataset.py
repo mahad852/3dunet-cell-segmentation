@@ -56,7 +56,7 @@ class CellDataset(Dataset):
         
         # labels[tub_mask.nonzero()] = 1
         labels[0][mito_mask.nonzero()] = 1
-    
+        print(labels.dtype)
         return labels
     
     def __getitem__(self, index):
