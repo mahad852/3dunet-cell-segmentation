@@ -43,6 +43,7 @@ loss:
   name: BCEWithLogitsLoss
   # weight: [0, 0.5, 0.5]
 # optimizer configuration
+  skip_last_target: true
 optimizer:
   # initial learning rate
   learning_rate: 0.0002
