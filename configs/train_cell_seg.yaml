@@ -7,7 +7,7 @@ model:
   # number of input channels to the model
   in_channels: 2
   # number of classes
-  out_channels: 2
+  out_channels: 3
   # determines the order of operators in a single layer (gcr - GroupNorm+Conv3d+ReLU)
   layer_order: gcr
   # number of features at each level of the U-Net
