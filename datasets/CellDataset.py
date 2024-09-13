@@ -3,7 +3,8 @@ from torch.utils.data import Dataset
 from typing import List
 
 import os
-import tifffile
+
+import skimage.io
 
 import numpy as np
 
@@ -57,8 +58,7 @@ class CellDataset(Dataset):
     def __getitem__(self, index):
         img_path = self.image_paths[index]
         
-        img = tifffile.imread(img_path)
+        img = skimage.io.imread(img_path)
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
-        img = (img / 256).round()
-
+        img = np.floor(img / 256) 
         return img, self.get_labels(img)

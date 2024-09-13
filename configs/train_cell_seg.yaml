@@ -7,7 +7,7 @@ model:
   # number of input channels to the model
   in_channels: 2
   # number of classes
-  out_channels: 3
+  out_channels: 2
   # determines the order of operators in a single layer (gcr - GroupNorm+Conv3d+ReLU)
   layer_order: gcr
   # number of features at each level of the U-Net
@@ -41,6 +41,7 @@ trainer:
 loss:
   # use BCE loss for training
   name: CrossEntropyLoss
+  weight: [0, 0.5, 0.5]
 # optimizer configuration
 optimizer:
   # initial learning rate
@@ -67,7 +68,7 @@ loaders:
   # class of the HDF5 dataset, currently StandardHDF5Dataset and LazyHDF5Dataset are supported.
   dataset: StandardHDF5Dataset
   # batch dimension; if number of GPUs is N > 1, then a batch_size of N * batch_size will automatically be taken for DataParallel
-  batch_size: 16
+  batch_size: 1
   # how many subprocesses to use for data loading
   num_workers: 1
   # path to the raw data within the H5
@@ -86,9 +87,9 @@ loaders:
     slice_builder:
       name: FilterSliceBuilder
       # train patch size given to the network (adapt to fit in your GPU mem, generally the bigger patch the better)
-      patch_shape: [20, 170, 170]
+      patch_shape: [26, 512, 512]
       # train stride between patches
-      stride_shape: [20, 40, 40]
+      stride_shape: [0, 0, 0]
       # minimum volume of the labels in the patch
       threshold: 0.01
       # probability of accepting patches which do not fulfil the threshold criterion
@@ -137,9 +138,9 @@ loaders:
     slice_builder:
       name: FilterSliceBuilder
       # train patch size given to the network (adapt to fit in your GPU mem, generally the bigger patch the better)
-      patch_shape: [20, 170, 170]
+      patch_shape: [26, 512, 512]
       # train stride between patches
-      stride_shape: [20, 170, 170]
+      stride_shape: [0, 0, 0]
       # minimum volume of the labels in the patch
       threshold: 0.01
       # probability of accepting patches which do not fulfil the threshold criterion
