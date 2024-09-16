@@ -58,24 +58,24 @@ def main(tempdir):
     segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
 
     # define transforms for image and segmentation
-    train_imtrans = Compose(
-        [
-            ScaleIntensity(),
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
-    train_segtrans = Compose(
-        [
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
+    # train_imtrans = Compose(
+    #     [
+    #         ScaleIntensity(),
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
+    # train_segtrans = Compose(
+    #     [
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
 
-    val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
-    val_segtrans = Compose([EnsureChannelFirst()])
+    # val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
+    # val_segtrans = Compose([EnsureChannelFirst()])
 
     # define image dataset, data loader
     check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
