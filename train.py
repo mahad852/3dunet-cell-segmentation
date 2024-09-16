@@ -57,6 +57,27 @@ def main(tempdir):
     images = sorted(glob(os.path.join(tempdir, "im*.nii.gz")))
     segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
 
+
+    # define transforms for image and segmentation
+    train_imtrans = Compose(
+        [
+            ScaleIntensity(),
+            EnsureChannelFirst(),
+            RandSpatialCrop((16, 512, 512), random_size=False),
+            # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+        ]
+    )
+    train_segtrans = Compose(
+        [
+            EnsureChannelFirst(),
+            RandSpatialCrop((16, 512, 512), random_size=False),
+            # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+        ]
+    )
+
+    val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
+    val_segtrans = Compose([EnsureChannelFirst()])
+
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
@@ -66,34 +87,13 @@ def main(tempdir):
     print(im.shape, seg.shape)
 
     # create a training data loader
-    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1, transform_image=train_imtrans, transform_seg=train_segtrans)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
     ######################################################################################################
-
-
-    # # define transforms for image and segmentation
-    # train_imtrans = Compose(
-    #     [
-    #         ScaleIntensity(),
-    #         EnsureChannelFirst(),
-    #         RandSpatialCrop((96, 96, 96), random_size=False),
-    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-    #     ]
-    # )
-    # train_segtrans = Compose(
-    #     [
-    #         EnsureChannelFirst(),
-    #         RandSpatialCrop((96, 96, 96), random_size=False),
-    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-    #     ]
-    # )
-
-    # val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
-    # val_segtrans = Compose([EnsureChannelFirst()])
     
     # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
     # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())

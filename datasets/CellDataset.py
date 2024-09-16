@@ -13,13 +13,17 @@ from skimage.filters import threshold_otsu
 class CellDataset(Dataset):
     def __init__(self, 
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
-                 num_channels = 2):
+                 num_channels = 2,
+                 transform_image = None,
+                 transform_seg = None):
 
         self.root_folder = data_path        
         self.validate_path(self.root_folder, f"Incorrect data_path supplied. Expected a directory, {self.root_folder} is not a directory.")
         
         self.image_paths = self.get_image_paths(self.root_folder)
         self.num_channels = num_channels
+        self.transform_image = transform_image
+        self.transform_seg = transform_seg
 
     def __len__(self):
         return len(self.image_paths)
@@ -41,7 +45,7 @@ class CellDataset(Dataset):
             raise ValueError(error_msg)
         
     def get_mask_for_single_channel_img(self, img):
-        return img >= threshold_otsu(img[0])
+        return img >= threshold_otsu(img)
         
     def get_mito_mask(self, img):
         return img[1] >= threshold_otsu(img[1])
@@ -50,7 +54,7 @@ class CellDataset(Dataset):
         return img[0] >= threshold_otsu(img[0])
     
     def get_labels(self, img):
-        labels = np.zeros(shape = img.shape, dtype=np.long)
+        labels = np.zeros(shape = img.shape[-3:], dtype=np.long)
         if self.num_channels == 1:
             mask = self.get_mask_for_single_channel_img(img)
             labels[mask.nonzero()] = 1
@@ -65,10 +69,18 @@ class CellDataset(Dataset):
         img_path = self.image_paths[index]
         
         img = skimage.io.imread(img_path)
+                
+        if self.num_channels > 1:
+            img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         
-        if self.num_channels == 1:
-            img = np.expand_dims(img, axis=1)
-        
-        img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         img = np.floor(img / 256, dtype=np.float32)
-        return img, self.get_labels(img)
+        
+        labels = self.get_labels(img)
+
+        if self.transform_image:
+            img = self.transform_image(img)
+
+        if self.transform_seg:
+            labels = self.transform_seg(labels)
+
+        return img, labels
