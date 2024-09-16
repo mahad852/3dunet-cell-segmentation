@@ -13,13 +13,13 @@ from skimage.filters import threshold_otsu
 class CellDataset(Dataset):
     def __init__(self, 
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
-                 is_train = True):
+                 num_channels = 2):
 
         self.root_folder = data_path        
         self.validate_path(self.root_folder, f"Incorrect data_path supplied. Expected a directory, {self.root_folder} is not a directory.")
         
         self.image_paths = self.get_image_paths(self.root_folder)
-        self.is_train = is_train
+        self.num_channels = num_channels
 
     def __len__(self):
         return len(self.image_paths)
@@ -40,22 +40,25 @@ class CellDataset(Dataset):
         if not os.path.exists(path):
             raise ValueError(error_msg)
         
+    def get_mask_for_single_channel_img(self, img):
+        return img >= threshold_otsu(img)
+        
     def get_mito_mask(self, img):
-        threshold = threshold_otsu(img[1])
-        return img[1] > threshold
-    
+        return img[1] >= threshold_otsu(img[1])
+        
     def get_tub_mask(self, img):
-        threshold = threshold_otsu(img[0])
-        return img[0] > threshold
+        return img[0] >= threshold_otsu(img[0])
     
     def get_labels(self, img):
-        tub_mask = self.get_tub_mask(img)
-        mito_mask = self.get_mito_mask(img)
-
-        labels = np.zeros(tub_mask.shape, dtype=np.long)
-        
-        # labels[tub_mask.nonzero()] = 1
-        labels[mito_mask.nonzero()] = 1
+        labels = np.zeros(shape = img.shape[-3:], dtype=np.long)
+        if self.num_channels == 1:
+            mask = self.get_mask_for_single_channel_img()
+            labels[mask.nonzero()] = 1
+        else:
+            tub_mask = self.get_tub_mask(img)
+            mito_mask = self.get_mito_mask(img)
+            labels[tub_mask.nonzero()] = 1
+            labels[mito_mask.nonzero()] = 2
         return labels
     
     def __getitem__(self, index):
