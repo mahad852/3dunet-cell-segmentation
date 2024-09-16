@@ -44,15 +44,15 @@ def main(tempdir):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     # create a temporary directory and 40 random image, mask pairs
-    print(f"generating synthetic data to {tempdir} (this may take a while)")
-    for i in range(40):
-        im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
+    # print(f"generating synthetic data to {tempdir} (this may take a while)")
+    # for i in range(40):
+    #     im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
 
-        n = nib.Nifti1Image(im, np.eye(4))
-        nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
+    #     n = nib.Nifti1Image(im, np.eye(4))
+    #     nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
 
-        n = nib.Nifti1Image(seg, np.eye(4))
-        nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
+    #     n = nib.Nifti1Image(seg, np.eye(4))
+    #     nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
 
     images = sorted(glob(os.path.join(tempdir, "im*.nii.gz")))
     segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
@@ -78,16 +78,16 @@ def main(tempdir):
     val_segtrans = Compose([EnsureChannelFirst()])
 
     # define image dataset, data loader
-    check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2')
+    check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
     check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
     im, seg = monai.utils.misc.first(check_loader)
     print(im.shape, seg.shape)
 
     # create a training data loader
-    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2')
+    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set')
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set/Mitochondria Channel', num_channels=1)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
     
     # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
@@ -175,9 +175,9 @@ def main(tempdir):
                 )
                 writer.add_scalar("val_mean_dice", metric, epoch + 1)
                 # plot the last model output as GIF image in TensorBoard with the corresponding image and label
-                plot_2d_or_3d_image(val_images, epoch + 1, writer, index=0, tag="image")
-                plot_2d_or_3d_image(val_labels, epoch + 1, writer, index=0, tag="label")
-                plot_2d_or_3d_image(val_outputs, epoch + 1, writer, index=0, tag="output")
+                # plot_2d_or_3d_image(val_images, epoch + 1, writer, index=0, tag="image")
+                # plot_2d_or_3d_image(val_labels, epoch + 1, writer, index=0, tag="label")
+                # plot_2d_or_3d_image(val_outputs, epoch + 1, writer, index=0, tag="output")
 
     print(f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}")
     writer.close()
