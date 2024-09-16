@@ -96,14 +96,14 @@ def main(tempdir):
     val_segtrans = Compose([EnsureChannelFirst()])
     
     train_ds = ImageDataset(images[:20], segs[:20], transform=None, seg_transform=None)
-    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=8, pin_memory=torch.cuda.is_available())
+    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
     check_ds = ImageDataset(images, segs, transform=None, seg_transform=None)
-    check_loader = DataLoader(check_ds, batch_size=10, num_workers=2, pin_memory=torch.cuda.is_available())
+    check_loader = DataLoader(check_ds, batch_size=10, num_workers=1, pin_memory=torch.cuda.is_available())
 
     # create a validation data loader
     val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4, pin_memory=torch.cuda.is_available())
+    val_loader = DataLoader(val_ds, batch_size=1, num_workers=1, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
     post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
