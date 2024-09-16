@@ -44,15 +44,15 @@ def main(tempdir):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     # create a temporary directory and 40 random image, mask pairs
-    print(f"generating synthetic data to {tempdir} (this may take a while)")
-    for i in range(40):
-        im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
+    # print(f"generating synthetic data to {tempdir} (this may take a while)")
+    # for i in range(40):
+    #     im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
 
-        n = nib.Nifti1Image(im, np.eye(4))
-        nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
+    #     n = nib.Nifti1Image(im, np.eye(4))
+    #     nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
 
-        n = nib.Nifti1Image(seg, np.eye(4))
-        nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
+    #     n = nib.Nifti1Image(seg, np.eye(4))
+    #     nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
 
     images = sorted(glob(os.path.join(tempdir, "im*.nii.gz")))
     segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
@@ -60,52 +60,52 @@ def main(tempdir):
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
-    # check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
-    # check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
-    # im, seg = monai.utils.misc.first(check_loader)
-    # print(im.shape, seg.shape)
+    check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
+    im, seg = monai.utils.misc.first(check_loader)
+    print(im.shape, seg.shape)
 
-    # # create a training data loader
-    # train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
-    # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
+    # create a training data loader
+    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    # val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
-    # val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
+    val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
     ######################################################################################################
 
 
-    # define transforms for image and segmentation
-    train_imtrans = Compose(
-        [
-            ScaleIntensity(),
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
-    train_segtrans = Compose(
-        [
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
+    # # define transforms for image and segmentation
+    # train_imtrans = Compose(
+    #     [
+    #         ScaleIntensity(),
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
+    # train_segtrans = Compose(
+    #     [
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
 
-    val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
-    val_segtrans = Compose([EnsureChannelFirst()])
+    # val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
+    # val_segtrans = Compose([EnsureChannelFirst()])
     
-    train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
-    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
+    # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
+    # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    check_ds = ImageDataset(images, segs, transform=None, seg_transform=None)
-    check_loader = DataLoader(check_ds, batch_size=10, num_workers=1, pin_memory=torch.cuda.is_available())
-    im, seg = monai.utils.misc.first(check_loader)
-    print(im.shape, seg.shape)
+    # check_ds = ImageDataset(images, segs, transform=None, seg_transform=None)
+    # check_loader = DataLoader(check_ds, batch_size=10, num_workers=1, pin_memory=torch.cuda.is_available())
+    # im, seg = monai.utils.misc.first(check_loader)
+    # print(im.shape, seg.shape)
 
-    # create a validation data loader
-    val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=1, pin_memory=torch.cuda.is_available())
+    # # create a validation data loader
+    # val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
+    # val_loader = DataLoader(val_ds, batch_size=1, num_workers=1, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
     post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
@@ -140,6 +140,7 @@ def main(tempdir):
             step += 1
             inputs, labels = batch_data[0].to(device), batch_data[1].to(device)
             optimizer.zero_grad()
+            print(inputs.shape, labels.shape)
             outputs = model(inputs)
             print(inputs.shape, labels.shape, outputs.shape, labels, outputs)
 
