@@ -87,7 +87,7 @@ def main(tempdir):
     train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set/Mitochondria Channel', num_channels=1)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
     
     # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
