@@ -41,7 +41,7 @@ class CellDataset(Dataset):
             raise ValueError(error_msg)
         
     def get_mask_for_single_channel_img(self, img):
-        return img >= threshold_otsu(img)
+        return img >= threshold_otsu(img[0])
         
     def get_mito_mask(self, img):
         return img[1] >= threshold_otsu(img[1])
@@ -50,7 +50,7 @@ class CellDataset(Dataset):
         return img[0] >= threshold_otsu(img[0])
     
     def get_labels(self, img):
-        labels = np.zeros(shape = img.shape[-3:], dtype=np.long)
+        labels = np.zeros(shape = img.shape, dtype=np.long)
         if self.num_channels == 1:
             mask = self.get_mask_for_single_channel_img(img)
             labels[mask.nonzero()] = 1
@@ -65,7 +65,10 @@ class CellDataset(Dataset):
         img_path = self.image_paths[index]
         
         img = skimage.io.imread(img_path)
-        if self.num_channels > 1:
-            img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
+        
+        if self.num_channels == 1:
+            img = np.expand_dims(img, axis=1)
+        
+        img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         img = np.floor(img / 256, dtype=np.float32)
         return img, self.get_labels(img)
