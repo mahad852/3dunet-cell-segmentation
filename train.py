@@ -76,29 +76,29 @@ def main(tempdir):
 
 
     # define transforms for image and segmentation
-    train_imtrans = Compose(
-        [
-            ScaleIntensity(),
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
-    train_segtrans = Compose(
-        [
-            EnsureChannelFirst(),
-            RandSpatialCrop((96, 96, 96), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-        ]
-    )
+    # train_imtrans = Compose(
+    #     [
+    #         ScaleIntensity(),
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
+    # train_segtrans = Compose(
+    #     [
+    #         EnsureChannelFirst(),
+    #         RandSpatialCrop((96, 96, 96), random_size=False),
+    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+    #     ]
+    # )
 
     val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
     val_segtrans = Compose([EnsureChannelFirst()])
     
-    train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
+    train_ds = ImageDataset(images[:20], segs[:20], transform=None, seg_transform=None)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=8, pin_memory=torch.cuda.is_available())
 
-    check_ds = ImageDataset(images, segs, transform=train_imtrans, seg_transform=train_segtrans)
+    check_ds = ImageDataset(images, segs, transform=None, seg_transform=None)
     check_loader = DataLoader(check_ds, batch_size=10, num_workers=2, pin_memory=torch.cuda.is_available())
 
     # create a validation data loader
