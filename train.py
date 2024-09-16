@@ -15,15 +15,15 @@ import sys
 import tempfile
 from glob import glob
 
-# import nibabel as nib
+import nibabel as nib
 import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from torch.utils.data import DataLoader
+# from torch.utils.data import DataLoader
 
 import monai
-from monai.data import ImageDataset, create_test_image_3d, decollate_batch #, DataLoader
+from monai.data import ImageDataset, create_test_image_3d, decollate_batch, DataLoader
 from monai.inferers import sliding_window_inference
 from monai.metrics import DiceMetric
 from monai.transforms import (
@@ -44,58 +44,66 @@ def main(tempdir):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     # create a temporary directory and 40 random image, mask pairs
-    # print(f"generating synthetic data to {tempdir} (this may take a while)")
-    # for i in range(40):
-    #     im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
+    print(f"generating synthetic data to {tempdir} (this may take a while)")
+    for i in range(40):
+        im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
 
-    #     n = nib.Nifti1Image(im, np.eye(4))
-    #     nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
+        n = nib.Nifti1Image(im, np.eye(4))
+        nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
 
-    #     n = nib.Nifti1Image(seg, np.eye(4))
-    #     nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
+        n = nib.Nifti1Image(seg, np.eye(4))
+        nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
 
     images = sorted(glob(os.path.join(tempdir, "im*.nii.gz")))
     segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
 
-    # define transforms for image and segmentation
-    # train_imtrans = Compose(
-    #     [
-    #         ScaleIntensity(),
-    #         EnsureChannelFirst(),
-    #         RandSpatialCrop((96, 96, 96), random_size=False),
-    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-    #     ]
-    # )
-    # train_segtrans = Compose(
-    #     [
-    #         EnsureChannelFirst(),
-    #         RandSpatialCrop((96, 96, 96), random_size=False),
-    #         RandRotate90(prob=0.5, spatial_axes=(0, 2)),
-    #     ]
-    # )
-
-    # val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
-    # val_segtrans = Compose([EnsureChannelFirst()])
-
     # define image dataset, data loader
-    check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
-    check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
-    im, seg = monai.utils.misc.first(check_loader)
-    print(im.shape, seg.shape)
+    ####################################### CUSTOM IMPL ###################################################
+   
+    # check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    # check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
+    # im, seg = monai.utils.misc.first(check_loader)
+    # print(im.shape, seg.shape)
 
-    # create a training data loader
-    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
-    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
+    # # create a training data loader
+    # train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
-    val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
+    # val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1)
+    # val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
+
+    ######################################################################################################
+
+
+    # define transforms for image and segmentation
+    train_imtrans = Compose(
+        [
+            ScaleIntensity(),
+            EnsureChannelFirst(),
+            RandSpatialCrop((96, 96, 96), random_size=False),
+            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+        ]
+    )
+    train_segtrans = Compose(
+        [
+            EnsureChannelFirst(),
+            RandSpatialCrop((96, 96, 96), random_size=False),
+            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+        ]
+    )
+
+    val_imtrans = Compose([ScaleIntensity(), EnsureChannelFirst()])
+    val_segtrans = Compose([EnsureChannelFirst()])
     
-    # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
-    # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=8, pin_memory=torch.cuda.is_available())
+    train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
+    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=8, pin_memory=torch.cuda.is_available())
+
+    check_ds = ImageDataset(images, segs, transform=train_imtrans, seg_transform=train_segtrans)
+    check_loader = DataLoader(check_ds, batch_size=10, num_workers=2, pin_memory=torch.cuda.is_available())
 
     # create a validation data loader
-    # val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
-    # val_loader = DataLoader(val_ds, batch_size=1, num_workers=4, pin_memory=torch.cuda.is_available())
+    val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
+    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
     post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
