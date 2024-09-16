@@ -145,9 +145,9 @@ def main(tempdir):
             step += 1
             inputs, labels = batch_data[0].to(device), batch_data[1].to(device)
             optimizer.zero_grad()
-            print(inputs.shape, labels.shape)
+            # print(inputs.shape, labels.shape)
             outputs = model(inputs)
-            print(inputs.shape, labels.shape, outputs.shape, labels, outputs)
+            # print(inputs.shape, labels.shape, outputs.shape, labels, outputs)
 
             loss = loss_function(outputs, labels)
             loss.backward()
