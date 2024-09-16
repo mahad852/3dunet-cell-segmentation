@@ -83,4 +83,8 @@ class CellDataset(Dataset):
         if self.transform_seg:
             labels = self.transform_seg(labels)
 
+        if self.num_channels == 1:
+            img = np.expand_dims(img, axis=0)
+            labels = np.expand_dims(labels, axis=0)
+
         return img, labels
