@@ -67,5 +67,5 @@ class CellDataset(Dataset):
         img = skimage.io.imread(img_path)
         if self.num_channels > 1:
             img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
-        img = np.floor(img / 256) 
+        img = np.floor(img / 256, dtype=np.float32)
         return img, self.get_labels(img)
