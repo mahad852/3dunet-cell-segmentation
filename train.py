@@ -39,6 +39,11 @@ from monai.visualize import plot_2d_or_3d_image
 
 from datasets.CellDataset import CellDataset
 
+class AddChannel(object):
+    def __call__(self, arr):
+        return np.expand_dims(arr, axis=0)
+
+
 def main(tempdir):
     monai.config.print_config()
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -61,6 +66,7 @@ def main(tempdir):
     # define transforms for image and segmentation
     train_imtrans = Compose(
         [
+            AddChannel(),
             ScaleIntensity(),
             RandSpatialCrop((16, 512, 512), random_size=False),
             # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
@@ -68,12 +74,14 @@ def main(tempdir):
     )
     train_segtrans = Compose(
         [
+            AddChannel(),
             RandSpatialCrop((16, 512, 512), random_size=False),
             # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
         ]
     )
 
-    val_imtrans = Compose([ScaleIntensity()])
+    val_imtrans = Compose([AddChannel(), ScaleIntensity()])
+    val_segtrans = Compose([AddChannel()])
 
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
@@ -87,7 +95,7 @@ def main(tempdir):
     train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1, transform_image=train_imtrans, transform_seg=train_segtrans)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=None)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
     ######################################################################################################
