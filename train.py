@@ -69,14 +69,14 @@ def main(tempdir):
             AddChannel(),
             ScaleIntensity(),
             RandSpatialCrop((16, 512, 512), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+            RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
     train_segtrans = Compose(
         [
             AddChannel(),
             RandSpatialCrop((16, 512, 512), random_size=False),
-            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+            RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
 
