@@ -52,7 +52,7 @@ class CellDataset(Dataset):
     def get_labels(self, img):
         labels = np.zeros(shape = img.shape[-3:], dtype=np.long)
         if self.num_channels == 1:
-            mask = self.get_mask_for_single_channel_img()
+            mask = self.get_mask_for_single_channel_img(img)
             labels[mask.nonzero()] = 1
         else:
             tub_mask = self.get_tub_mask(img)
