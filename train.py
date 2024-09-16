@@ -69,14 +69,14 @@ def main(tempdir):
             AddChannel(),
             ScaleIntensity(),
             RandSpatialCrop((16, 512, 512), random_size=False),
-            # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
         ]
     )
     train_segtrans = Compose(
         [
             AddChannel(),
             RandSpatialCrop((16, 512, 512), random_size=False),
-            # RandRotate90(prob=0.5, spatial_axes=(0, 2)),
+            RandRotate90(prob=0.5, spatial_axes=(0, 2)),
         ]
     )
 
@@ -135,7 +135,7 @@ def main(tempdir):
     epoch_loss_values = list()
     metric_values = list()
     writer = SummaryWriter()
-    for epoch in range(5):
+    for epoch in range(100):
         print("-" * 10)
         print(f"epoch {epoch + 1}/{5}")
         model.train()
