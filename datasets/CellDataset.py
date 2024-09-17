@@ -83,7 +83,7 @@ class CellDataset(Dataset):
         
         labels = self.get_labels(img)
 
-        img = self.denoise_img(self.normalize_img(img))
+        img = self.normalize_img(img)
 
         if self.transform_image:
             img = self.transform_image(img)

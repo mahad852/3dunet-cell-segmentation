@@ -126,8 +126,9 @@ def main(tempdir):
         num_res_units=2,
     ).to(device)
     loss_function = monai.losses.DiceLoss(sigmoid=True)
-    optimizer = torch.optim.Adam(model.parameters(), 1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), 1e-5)
 
+    num_epochs = 2000
     # start a typical PyTorch training
     val_interval = 2
     best_metric = -1
@@ -135,9 +136,9 @@ def main(tempdir):
     epoch_loss_values = list()
     metric_values = list()
     writer = SummaryWriter()
-    for epoch in range(100):
+    for epoch in range(num_epochs):
         print("-" * 10)
-        print(f"epoch {epoch + 1}/{5}")
+        print(f"epoch {epoch + 1}/{num_epochs}")
         model.train()
         epoch_loss = 0
         step = 0
