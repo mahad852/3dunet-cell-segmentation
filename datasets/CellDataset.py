@@ -90,4 +90,6 @@ class CellDataset(Dataset):
         #     img = np.expand_dims(img, axis=0)
         #     labels = np.expand_dims(labels, axis=0)
 
+        img = self.normalize_img(img)
+
         return img, labels
