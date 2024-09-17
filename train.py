@@ -126,7 +126,7 @@ def main(tempdir):
         num_res_units=2,
     ).to(device)
     loss_function = monai.losses.DiceLoss(sigmoid=True)
-    optimizer = torch.optim.Adam(model.parameters(), 1e-2)
+    optimizer = torch.optim.Adam(model.parameters(), 1e-6)
 
     num_epochs = 2000
     # start a typical PyTorch training
