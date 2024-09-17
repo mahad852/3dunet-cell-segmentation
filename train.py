@@ -25,7 +25,7 @@ from torch.utils.tensorboard import SummaryWriter
 import monai
 from monai.data import ImageDataset, create_test_image_3d, decollate_batch, DataLoader
 from monai.inferers import sliding_window_inference
-from monai.metrics import DiceMetric
+from monai.metrics import DiceMetric, MeanIoU
 from monai.transforms import (
     Activations,
     EnsureChannelFirst,
@@ -113,6 +113,7 @@ def main(tempdir):
     # val_loader = DataLoader(val_ds, batch_size=1, num_workers=1, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
+    iou_metric = MeanIoU(include_background=True, reduction="mean")
     post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
 
     # create UNet, DiceLoss and Adam optimizer
@@ -174,13 +175,17 @@ def main(tempdir):
                     val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
                     val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
 
-                    print(val_outputs, val_labels)
                     # compute metric for current iteration
                     dice_metric(y_pred=val_outputs, y=val_labels)
+                    iou_metric(y_pred=val_outputs, y=val_labels)
                 # aggregate the final mean dice result
                 metric = dice_metric.aggregate().item()
+                val_iou = iou_metric.aggregate().item()
+
                 # reset the status for next validation round
                 dice_metric.reset()
+                iou_metric.reset()
+
                 metric_values.append(metric)
                 if metric > best_metric:
                     best_metric = metric
@@ -188,8 +193,8 @@ def main(tempdir):
                     torch.save(model.state_dict(), "best_metric_model_segmentation3d_array.pth")
                     print("saved new best metric model")
                 print(
-                    "current epoch: {} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
-                        epoch + 1, metric, best_metric, best_metric_epoch
+                    "current epoch: {} current mean IoU: {:.4f} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
+                        epoch + 1, val_iou, metric, best_metric, best_metric_epoch
                     )
                 )
                 writer.add_scalar("val_mean_dice", metric, epoch + 1)
