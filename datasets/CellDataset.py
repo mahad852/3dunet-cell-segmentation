@@ -68,6 +68,9 @@ class CellDataset(Dataset):
     def normalize_img(self, img):
         return (img - img.mean())/img.std()
     
+    def denoise_img(self, img):
+        return img * (img > threshold_otsu(img))
+    
     def __getitem__(self, index):
         img_path = self.image_paths[index]
         
@@ -80,6 +83,8 @@ class CellDataset(Dataset):
         
         labels = self.get_labels(img)
 
+        img = self.denoise_img(self.normalize_img(img))
+
         if self.transform_image:
             img = self.transform_image(img)
 
@@ -89,7 +94,5 @@ class CellDataset(Dataset):
         # if self.num_channels == 1:
         #     img = np.expand_dims(img, axis=0)
         #     labels = np.expand_dims(labels, axis=0)
-
-        img = self.normalize_img(img)
 
         return img, labels
