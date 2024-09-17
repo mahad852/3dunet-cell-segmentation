@@ -65,6 +65,9 @@ class CellDataset(Dataset):
             labels[mito_mask.nonzero()] = 2
         return labels
     
+    def normalize_img(self, img):
+        return (img - img.mean())/img.std()
+    
     def __getitem__(self, index):
         img_path = self.image_paths[index]
         
