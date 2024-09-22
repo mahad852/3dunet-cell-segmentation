@@ -100,7 +100,7 @@ def main():
         num_res_units=2,
     ).to(device)
     loss_function = monai.losses.DiceLoss(sigmoid=True)
-    optimizer = torch.optim.Adam(model.parameters(), 1e-2)
+    optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 
     num_epochs = 20
     # start a typical PyTorch training

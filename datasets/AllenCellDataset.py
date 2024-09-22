@@ -5,6 +5,7 @@ import skimage.io
 import numpy as np
 from skimage.filters import threshold_otsu
 import cv2
+import random
 
 class AllenCellDataset(Dataset):
     def __init__(self, 
@@ -58,6 +59,8 @@ class AllenCellDataset(Dataset):
         if len(image_paths) == 0:
             raise ValueError(f"Expected tif files in the path: {dir}, but found none.")
         
+        random.shuffle(image_paths)
+
         if is_train:
             return image_paths[:int(len(image_paths) * 0.70)]
         else:
@@ -100,7 +103,7 @@ class AllenCellDataset(Dataset):
         tlight = self.crop_z(self.resize_image(tlight))
         targets = [self.crop_z(self.resize_image(target)) for target in targets]
 
-        tlight = self.normalize_img(self.denoise_img(tlight))   
+        tlight = self.normalize_img(tlight)   
 
         labels = [self.get_labels(target) for target in targets]
 
