@@ -47,12 +47,12 @@ class AllenCellDataset(Dataset):
     def get_image_paths(self, dir: str, is_train: bool) -> List[str]:
         image_paths = []
         for fname in os.listdir(dir):
-            if fname.split('.')[-1] != 'tif':
+            if fname.split('.')[-1] != 'tiff':
                 continue 
             image_paths.append(os.path.join(dir, fname))
 
         if len(image_paths) == 0:
-            raise ValueError(f"Expected tif files in the path: {dir}, but found noen.")
+            raise ValueError(f"Expected tif files in the path: {dir}, but found none.")
         
         if is_train:
             return image_paths[:int(len(image_paths) * 0.70)]
