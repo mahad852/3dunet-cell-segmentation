@@ -10,12 +10,9 @@
 # limitations under the License.
 
 import logging
-import os
 import sys
-import tempfile
 from glob import glob
 
-import nibabel as nib
 import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -38,44 +35,30 @@ from monai.transforms import (
 from monai.visualize import plot_2d_or_3d_image
 
 from datasets.CellDataset import CellDataset
+from datasets.AllenCellDataset import AllenCellDataset
 
 class AddChannel(object):
     def __call__(self, arr):
         return np.expand_dims(arr, axis=0)
 
 
-def main(tempdir):
+def main():
     monai.config.print_config()
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-    # create a temporary directory and 40 random image, mask pairs
-    # print(f"generating synthetic data to {tempdir} (this may take a while)")
-    # for i in range(40):
-    #     im, seg = create_test_image_3d(128, 128, 128, num_seg_classes=1)
-
-    #     n = nib.Nifti1Image(im, np.eye(4))
-    #     nib.save(n, os.path.join(tempdir, f"im{i:d}.nii.gz"))
-
-    #     n = nib.Nifti1Image(seg, np.eye(4))
-    #     nib.save(n, os.path.join(tempdir, f"seg{i:d}.nii.gz"))
-
-    images = sorted(glob(os.path.join(tempdir, "im*.nii.gz")))
-    segs = sorted(glob(os.path.join(tempdir, "seg*.nii.gz")))
-
 
     # define transforms for image and segmentation
     train_imtrans = Compose(
         [
             AddChannel(),
             ScaleIntensity(),
-            RandSpatialCrop((16, 512, 512), random_size=False),
+            RandSpatialCrop((16, 512, 512), random_size=False, random_center=False),
             RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
     train_segtrans = Compose(
         [
             AddChannel(),
-            RandSpatialCrop((16, 512, 512), random_size=False),
+            RandSpatialCrop((16, 512, 512), random_size=False, random_center=False),
             RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
@@ -86,31 +69,21 @@ def main(tempdir):
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
-    check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    # check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1)
+    check_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
     check_loader = DataLoader(check_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
     im, seg = monai.utils.misc.first(check_loader)
     print(im.shape, seg.shape)
 
     # create a training data loader
-    train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1, transform_image=train_imtrans, transform_seg=train_segtrans)
+    # train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2/Mitochondria Channel', num_channels=1, transform_image=train_imtrans, transform_seg=train_segtrans)
+    train_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
+    # val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
+    val_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=val_imtrans, transform_seg=val_segtrans, is_train=False)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    ######################################################################################################
-    
-    # train_ds = ImageDataset(images[:20], segs[:20], transform=train_imtrans, seg_transform=train_segtrans)
-    # train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
-
-    # check_ds = ImageDataset(images, segs, transform=None, seg_transform=None)
-    # check_loader = DataLoader(check_ds, batch_size=10, num_workers=1, pin_memory=torch.cuda.is_available())
-    # im, seg = monai.utils.misc.first(check_loader)
-    # print(im.shape, seg.shape)
-
-    # # create a validation data loader
-    # val_ds = ImageDataset(images[-20:], segs[-20:], transform=val_imtrans, seg_transform=val_segtrans)
-    # val_loader = DataLoader(val_ds, batch_size=1, num_workers=1, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
     iou_metric = MeanIoU(include_background=True, reduction="mean")
@@ -208,5 +181,4 @@ def main(tempdir):
 
 
 if __name__ == "__main__":
-    tempdir = '/home/mali2/datasets/CellSeg/temp'
-    main(tempdir)
+    main()
