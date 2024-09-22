@@ -32,6 +32,10 @@ class AllenCellDataset(Dataset):
 
         return img_stack
     
+    def crop_z(self, img, depth = 32):
+        center = int(len(img)/2)
+        return img[center - int(depth/2):center + int(depth/2), :, :]
+    
     def separate_channels(self, multi_channel_img):
         target_to_channel_index = {'mitochondria' : 14}
 
@@ -93,8 +97,8 @@ class AllenCellDataset(Dataset):
     def __getitem__(self, index):        
         tlight, targets = self.separate_channels(self.read_image(image_path=self.image_paths[index]))
 
-        tlight = self.resize_image(tlight)
-        targets = [self.resize_image(target) for target in targets]
+        tlight = self.crop_z(self.resize_image(tlight))
+        targets = [self.crop_z(self.resize_image(target)) for target in targets]
 
         tlight = self.normalize_img(self.denoise_img(tlight))   
 
