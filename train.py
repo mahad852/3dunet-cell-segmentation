@@ -102,7 +102,7 @@ def main():
     loss_function = monai.losses.DiceLoss(sigmoid=True)
     optimizer = torch.optim.Adam(model.parameters(), 1e-2)
 
-    num_epochs = 2000
+    num_epochs = 20
     # start a typical PyTorch training
     val_interval = 2
     best_metric = -1
