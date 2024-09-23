@@ -94,13 +94,15 @@ def main():
 
             for label, output in zip(val_labels, val_outputs):
                 label, output = label.cpu().detach().numpy(), output.cpu().detach().numpy()
-
-                print(output.shape, label.shape)
-
                 label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
                 output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
-                tifffile.imwrite(label_fname, (label[0] * 255))
-                tifffile.imwrite(output_fname, (output[0] * 255))
+
+                label = label[0] * 255
+                output = output[0] * 255
+                print(label, output, label.shape, output.shape)
+
+                tifffile.imwrite(label_fname, label)
+                tifffile.imwrite(output_fname, output)
                 image_index += 1
 
             # compute metric for current iteration
