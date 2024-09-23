@@ -97,7 +97,7 @@ def main():
                 label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
                 output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
 
-                label = label[0] * 255
+                label = label[0] * 255.0
                 output = output[0] * 255
 
                 print(np.unique(output), np.unique(label), output.dtype, label.dtype, label.shape, output.shape)
