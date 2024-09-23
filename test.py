@@ -37,6 +37,8 @@ from monai.visualize import plot_2d_or_3d_image
 from datasets.CellDataset import CellDataset
 from datasets.AllenCellDataset import AllenCellDataset
 
+import tifffile
+
 class AddChannel(object):
     def __call__(self, arr):
         return np.expand_dims(arr, axis=0)
@@ -72,9 +74,11 @@ def main():
         num_res_units=2,
     ).to(device)
 
-    model.load_state_dict(torch.load('best_metric_model_segmentation3d_array_trained.pth', map_location=device))
+    model.load_state_dict(torch.load('best_metric_model_segmentation3d_array_trained.pth', map_location=device, weights_only=True))
     
     writer = SummaryWriter()
+    
+    image_index = 0
 
     model.eval()
     with torch.no_grad():
@@ -87,6 +91,12 @@ def main():
             sw_batch_size = 4
             val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
             val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
+
+            for label, output in zip(val_labels, val_outputs):
+                label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
+                output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
+                tifffile.imwrite(label_fname, (label[0] * 255))
+                tifffile.imwrite(output_fname, (output[0] * 255))
 
             # compute metric for current iteration
             dice_metric(y_pred=val_outputs, y=val_labels)
