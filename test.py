@@ -99,7 +99,8 @@ def main():
 
                 label = label[0] * 255
                 output = output[0] * 255
-                print(label, output, label.shape, output.shape)
+
+                print(np.unique(output), np.unique(label), output.dtype, label.dtype, label.shape, output.shape)
 
                 tifffile.imwrite(label_fname, label)
                 tifffile.imwrite(output_fname, output)
