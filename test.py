@@ -93,6 +93,7 @@ def main():
             val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
 
             for label, output in zip(val_labels, val_outputs):
+                label, output = label.detach().numpy(), output.detach().numpy()
                 label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
                 output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
                 tifffile.imwrite(label_fname, (label[0] * 255))
