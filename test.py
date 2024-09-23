@@ -94,6 +94,9 @@ def main():
 
             for label, output in zip(val_labels, val_outputs):
                 label, output = label.cpu().detach().numpy(), output.cpu().detach().numpy()
+
+                print(label, label.shape)
+
                 label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
                 output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
                 tifffile.imwrite(label_fname, (label[0] * 255))
