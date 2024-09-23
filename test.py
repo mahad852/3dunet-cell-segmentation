@@ -98,6 +98,7 @@ def main():
                 output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
                 tifffile.imwrite(label_fname, (label[0] * 255))
                 tifffile.imwrite(output_fname, (output[0] * 255))
+                image_index += 1
 
             # compute metric for current iteration
             dice_metric(y_pred=val_outputs, y=val_labels)
