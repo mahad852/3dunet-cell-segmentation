@@ -107,4 +107,4 @@ class CellDataset(Dataset):
         if self.transform_seg:
             labels = self.transform_seg(labels)
 
-        return img, labels, self.image_paths[index]
+        return img.astype(np.float32), labels, self.image_paths[index]
