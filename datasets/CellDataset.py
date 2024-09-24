@@ -8,7 +8,7 @@ import skimage.io
 
 import numpy as np
 
-from skimage.filters import threshold_otsu
+from skimage.filters import threshold_otsu, threshold_sauvola, threshold_triangle
 
 class CellDataset(Dataset):
     def __init__(self, 
@@ -53,7 +53,7 @@ class CellDataset(Dataset):
         mask = np.zeros(shape=img[1].shape)
         img = img[1]
         for z in range(len(mask)):
-            mask[z] = img[z] > threshold_otsu(img[z])
+            mask[z] = img[z] > threshold_triangle(img[z])
         return mask
         
     def get_tub_mask(self, img):
