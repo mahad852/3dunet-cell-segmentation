@@ -84,6 +84,11 @@ def main():
     # val_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=val_imtrans, transform_seg=val_segtrans, is_train=False)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
+
+    dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
+    iou_metric = MeanIoU(include_background=True, reduction="mean")
+    post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
+
     # create UNet, DiceLoss and Adam optimizer
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = monai.networks.nets.UNet(
@@ -94,16 +99,16 @@ def main():
         strides=(2, 2, 2, 2),
         num_res_units=2,
     ).to(device)
-    loss_function = torch.nn.MSELoss()
+    loss_function = monai.losses.DiceLoss(sigmoid=True)
     optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 
-    num_epochs = 1000
+    num_epochs = 500
     # start a typical PyTorch training
     val_interval = 1
-    best_loss = 2 ** 31
-    best_loss_epoch = -1
+    best_metric = -1
+    best_metric_epoch = -1
     epoch_loss_values = list()
-    loss_values = list()
+    metric_values = list()
     writer = SummaryWriter()
     for epoch in range(num_epochs):
         print("-" * 10)
@@ -132,8 +137,6 @@ def main():
 
         if (epoch + 1) % val_interval == 0:
             model.eval()
-            val_loss = 0
-            vaL_samples = 0
             with torch.no_grad():
                 val_images = None
                 val_labels = None
@@ -143,32 +146,37 @@ def main():
                     roi_size = (16, 512, 512)
                     sw_batch_size = 4
                     val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
+                    val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
 
-                    val_loss += len(val_images) * loss_function(val_outputs.cpu(), val_labels.cpu())
-                    vaL_samples += len(val_images)
-                    
+                    # compute metric for current iteration
+                    dice_metric(y_pred=val_outputs, y=val_labels)
+                    iou_metric(y_pred=val_outputs, y=val_labels)
                 # aggregate the final mean dice result
-                val_loss = val_loss/vaL_samples
-                # reset the status for next validation round
+                metric = dice_metric.aggregate().item()
+                val_iou = iou_metric.aggregate().item()
 
-                loss_values.append(val_loss)
-                if val_loss > best_loss:
-                    best_loss = val_loss
-                    best_loss_epoch = epoch + 1
-                    torch.save(model.state_dict(), "best_loss_model_regression_composite.pth")
+                # reset the status for next validation round
+                dice_metric.reset()
+                iou_metric.reset()
+
+                metric_values.append(metric)
+                if metric > best_metric:
+                    best_metric = metric
+                    best_metric_epoch = epoch + 1
+                    torch.save(model.state_dict(), "best_metric_model_segmentation3d_composite.pth")
                     print("saved new best metric model")
                 print(
-                    "current epoch: {} current mean loss: {:.4f} best mean loss: {:.4f} at epoch {}".format(
-                        epoch + 1, val_loss, best_loss, best_loss_epoch
+                    "current epoch: {} current mean IoU: {:.4f} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
+                        epoch + 1, val_iou, metric, best_metric, best_metric_epoch
                     )
                 )
-                writer.add_scalar("val_mean_loss", val_loss, epoch + 1)
+                writer.add_scalar("val_mean_dice", metric, epoch + 1)
                 # plot the last model output as GIF image in TensorBoard with the corresponding image and label
                 # plot_2d_or_3d_image(val_images, epoch + 1, writer, index=0, tag="image")
                 # plot_2d_or_3d_image(val_labels, epoch + 1, writer, index=0, tag="label")
                 # plot_2d_or_3d_image(val_outputs, epoch + 1, writer, index=0, tag="output")
 
-    print(f"train completed, best_metric: {best_loss:.4f} at epoch: {best_loss_epoch}")
+    print(f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}")
     writer.close()
 
 
