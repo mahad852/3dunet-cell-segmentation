@@ -49,8 +49,12 @@ class CellDataset(Dataset):
     def get_mask_for_single_channel_img(self, img):
         return img >= threshold_otsu(img)
         
-    def get_mito_mask(self, img):
-        return img[1] >= threshold_otsu(img[1])
+    def get_mito_mask(self, img: np.ndarray):
+        mask = np.zeros(shape=img[1].shape)
+        img = img[1]
+        for z in range(len(mask)):
+            mask[z] = img[z] > threshold_otsu(img[z])
+        return mask
         
     def get_tub_mask(self, img):
         return img[0] >= threshold_otsu(img[0])
