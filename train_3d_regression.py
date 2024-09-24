@@ -152,14 +152,14 @@ def main():
                 # reset the status for next validation round
 
                 loss_values.append(val_loss)
-                if val_loss > best_loss:
+                if val_loss < best_loss:
                     best_loss = val_loss
                     best_loss_epoch = epoch + 1
                     torch.save(model.state_dict(), "best_loss_model_regression_composite.pth")
                     print("saved new best metric model")
                 print(
-                    "current epoch: {} current mean loss: {:.4f} best mean loss: {:.4f} at epoch {}".format(
-                        epoch + 1, val_loss, best_loss, best_loss_epoch
+                    "current epoch: {} current mean loss: {:.4f} current rmse: {:.4f} best mean loss: {:.4f} best rmse: {:.4f} at epoch {}".format(
+                        epoch + 1, val_loss, np.sqrt(val_loss), best_loss, np.sqrt(best_loss), best_loss_epoch
                     )
                 )
                 writer.add_scalar("val_mean_loss", val_loss, epoch + 1)
