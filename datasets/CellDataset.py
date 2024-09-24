@@ -53,7 +53,7 @@ class CellDataset(Dataset):
         mask = np.zeros(shape=img[1].shape)
         img = img[1]
         for z in range(len(mask)):
-            mask[z] = img[z] > threshold_triangle(img[z])
+            mask[z] = img[z] > threshold_otsu(img[z])
         return mask
         
     def get_tub_mask(self, img):
