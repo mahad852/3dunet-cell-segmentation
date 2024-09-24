@@ -15,7 +15,8 @@ class CellDataset(Dataset):
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
                  num_channels = 2,
                  transform_image = None,
-                 transform_seg = None):
+                 transform_seg = None,
+                 is_segmentation=True):
 
         self.root_folder = data_path        
         self.validate_path(self.root_folder, f"Incorrect data_path supplied. Expected a directory, {self.root_folder} is not a directory.")
@@ -24,6 +25,7 @@ class CellDataset(Dataset):
         self.num_channels = num_channels
         self.transform_image = transform_image
         self.transform_seg = transform_seg
+        self.is_segmentation = is_segmentation
 
     def __len__(self):
         return len(self.image_paths)
@@ -54,7 +56,7 @@ class CellDataset(Dataset):
         return img[0] >= threshold_otsu(img[0])
     
     def get_labels(self, img):
-        labels = np.zeros(shape = img.shape[-3:], dtype=np.long)
+        labels = np.zeros(shape = img.shape[-3:], dtype=np.int64)
         if self.num_channels == 1:
             mask = self.get_mask_for_single_channel_img(img)
             labels[mask.nonzero()] = 1
@@ -71,19 +73,33 @@ class CellDataset(Dataset):
     def denoise_img(self, img):
         return img * (img > threshold_otsu(img))
     
+    def scale_image(self, img):
+        return img * (255/img.max())
+    
+    def convert_image_to_single_channel(self, img):
+        img_cpy = np.zeros(img.shape)
+        for c in range(len(img)):
+            img_cpy[c] = self.scale_image(img[c])
+
+        return img_cpy.mean(axis=0)
+    
+    def get_mito_image(self, img):
+        return self.scale_image(img[1])
+    
+    def get_item_for_multichannel(self, img : np.ndarray):
+        img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
+        labels = self.get_labels(img) == 2 if self.is_segmentation else self.get_mito_image(img) / 255
+        return self.convert_image_to_single_channel(img) / 256, labels
+    
+    def get_item_for_single_channel(self, img : np.ndarray):
+        return self.denoise_img(img), self.get_labels(img)
+
     def __getitem__(self, index):
         img_path = self.image_paths[index]
-        
         img = skimage.io.imread(img_path)
-                
-        if self.num_channels > 1:
-            img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
-        
-        img = np.floor(img / 256, dtype=np.float32)
-        
-        labels = self.get_labels(img)
 
-        img = self.normalize_img(self.denoise_img(img))
+        img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
+        img = self.normalize_img(img)
 
         if self.transform_image:
             img = self.transform_image(img)
@@ -91,8 +107,4 @@ class CellDataset(Dataset):
         if self.transform_seg:
             labels = self.transform_seg(labels)
 
-        # if self.num_channels == 1:
-        #     img = np.expand_dims(img, axis=0)
-        #     labels = np.expand_dims(labels, axis=0)
-
-        return img, labels
+        return img, labels, self.image_paths[index]
