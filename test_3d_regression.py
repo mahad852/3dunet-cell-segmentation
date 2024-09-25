@@ -47,10 +47,10 @@ class AddChannel(object):
 
 def get_mito_masks(imgs: np.ndarray):
     print(imgs.shape)
+    imgs = (imgs * 255).astype(np.uint8)
     masks = np.zeros(shape=imgs.shape)
     for i, img in enumerate(imgs):
         for z in range(len(img[0])):
-            print(img[0][z].shape)
             print(img.shape, img[0][z] >= threshold_otsu(img[0][z]))
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
     return masks
