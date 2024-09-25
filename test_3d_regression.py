@@ -80,7 +80,7 @@ def main():
         num_res_units=2,
     ).to(device)
 
-    model.load_state_dict(torch.load('best_metric_model_segmentation3d_array_trained.pth', map_location=device, weights_only=True))
+    model.load_state_dict(torch.load('best_loss_model_regression_composite.pth', map_location=device, weights_only=True))
     
 
     model.eval()
