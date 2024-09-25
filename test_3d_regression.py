@@ -46,7 +46,6 @@ class AddChannel(object):
         return np.expand_dims(arr, axis=0)
 
 def get_mito_masks(imgs: np.ndarray):
-    imgs = (imgs * 255)
     masks = np.zeros(shape=imgs.shape)
     for i, img in enumerate(imgs):
         for z in range(len(img[0])):
