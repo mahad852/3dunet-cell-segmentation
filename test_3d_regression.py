@@ -52,6 +52,13 @@ def get_mito_masks(imgs: np.ndarray):
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
     return torch.Tensor(masks)
 
+def get_mito_masks_custom(imgs: np.ndarray):
+    masks = np.zeros(shape=imgs.shape)
+    for i, img in enumerate(imgs):
+        for z in range(len(img[0])):
+            masks[i][0][z] = img[0][z] >= np.percentile(img[0][z], 97)
+    return torch.Tensor(masks)
+
 def denoise_img(img):
     for i in range(len(img)):
         img[i] *= (img[i] > threshold_otsu(img[i]))
@@ -117,7 +124,7 @@ def main():
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
-            out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
+            out_masks = get_mito_masks_custom(val_outputs.detach().cpu().numpy())
 
             iou_metric(y_pred=out_masks, y=val_masks)
 
