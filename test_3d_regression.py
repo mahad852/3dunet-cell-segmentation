@@ -58,10 +58,10 @@ def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
-    val_imtrans = Compose([AddChannel(), ScaleIntensity()])
+    val_imtrans = Compose([AddChannel()])#, ScaleIntensity()])
     val_segtrans = Compose([AddChannel()])
    
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=False)
     val_loader = DataLoader(val_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
 
     iou_metric = MeanIoU(include_background=True, reduction="mean")
