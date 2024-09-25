@@ -57,7 +57,8 @@ def denoise_img(img):
     return img * (img > 5)
 
 def remove_zeros(img):
-    return img[img < 0] = 0
+    img[img < 0] = 0
+    return img
 
 def main():
     monai.config.print_config()
@@ -107,7 +108,7 @@ def main():
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
                 out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
-                tifffile.imwrite(out_file, (output[0] * 65535).cpu().numpy().astype(np.int16))
+                tifffile.imwrite(out_file, (remove_zeros(output[0]) * 65535).cpu().numpy().astype(np.int16))
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
