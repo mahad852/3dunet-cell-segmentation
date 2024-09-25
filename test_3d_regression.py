@@ -61,9 +61,10 @@ def get_mito_masks_custom(imgs: np.ndarray):
     return torch.Tensor(masks)
 
 def denoise_img(img):
-    for i in range(len(img)):
-        img[i] *= (img[i] > threshold_otsu(img[i]))
-    return img
+    # for i in range(len(img)):
+    #     img[i] *= (img[i] > threshold_otsu(img[i]))
+    # return img
+    return img * (img > threshold_otsu(img))
 
 def scale_image(img, max_val = 65535):
     return ((img - img.min())/(img.max() - img.min())) * max_val
@@ -111,8 +112,8 @@ def main():
         for val_data in val_loader:
             val_images, val_labels, img_pths = val_data[0].to(device), val_data[1].to(device), val_data[2]
             
-            val_images = val_images[:, :, 10:16, :, :]
-            val_labels = val_labels[:, :, 10:16, :, :]
+            # val_images = val_images[:, :, 10:16, :, :]
+            # val_labels = val_labels[:, :, 10:16, :, :]
 
             roi_size = (16, 512, 512)
             sw_batch_size = 4
