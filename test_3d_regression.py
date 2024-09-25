@@ -56,7 +56,7 @@ def get_mito_masks_custom(imgs: np.ndarray):
     masks = np.zeros(shape=imgs.shape)
     for i, img in enumerate(imgs):
         for z in range(len(img[0])):
-            masks[i][0][z] = img[0][z] >= (threshold_otsu(img[0][z]) * 1.7)
+            masks[i][0][z] = img[0][z] >= (threshold_otsu(img[0][z]) * 1.2)
     return torch.Tensor(masks)
 
 def denoise_img(img):
