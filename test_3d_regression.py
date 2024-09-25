@@ -99,8 +99,8 @@ def main():
             val_loss += len(val_images) * loss_function(val_outputs.cpu(), val_labels.cpu())
             vaL_samples += len(val_images)
 
-            val_masks = get_mito_masks(val_labels)
-            out_masks = get_mito_masks(val_outputs)
+            val_masks = get_mito_masks(val_labels.detach().cpu())
+            out_masks = get_mito_masks(val_outputs.detach().cpu())
 
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
