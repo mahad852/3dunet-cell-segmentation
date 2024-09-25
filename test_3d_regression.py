@@ -106,8 +106,9 @@ def main():
                 out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
                 tifffile.imwrite(out_file, (output[0] * 65536).cpu().numpy().astype(np.int16), imagej=True)
 
+            print(val_masks, out_masks, val_masks.shape, out_masks.shape)
+
             iou_metric(y_pred=val_masks, y=out_masks)
-            
         # aggregate the final mean dice result
         val_loss = val_loss/vaL_samples
         val_iou = iou_metric.aggregate().item()
