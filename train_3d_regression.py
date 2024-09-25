@@ -51,14 +51,14 @@ def main():
         [
             AddChannel(),
             # ScaleIntensity(),
-            RandSpatialCrop((16, 512, 512), random_size=False, random_center=False),
+            RandSpatialCrop((16, 512, 512), random_size=False),
             # RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
     train_segtrans = Compose(
         [
             AddChannel(),
-            RandSpatialCrop((16, 512, 512), random_size=False, random_center=False),
+            RandSpatialCrop((16, 512, 512), random_size=False),
             # RandRotate90(prob=0.5, spatial_axes=(1, 2)),
         ]
     )
