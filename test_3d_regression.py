@@ -101,6 +101,8 @@ def main():
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
             out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
 
+            val_masks = [val_mask for val_mask in val_masks]
+
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
                 out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
