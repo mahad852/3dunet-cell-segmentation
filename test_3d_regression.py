@@ -108,7 +108,7 @@ def main():
 
             print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
-            iou_metric(y_pred=val_masks, y=out_masks)
+            iou_metric(y_pred=out_masks, y=val_masks)
         # aggregate the final mean dice result
         val_loss = val_loss/vaL_samples
         val_iou = iou_metric.aggregate().item()
