@@ -16,26 +16,44 @@ class CellDataset(Dataset):
                  num_channels = 2,
                  transform_image = None,
                  transform_seg = None,
-                 is_segmentation=True):
+                 is_segmentation=True,
+                 is_train = True,
+                 img_depth = 26,
+                 crop_depth = 16):
 
         self.root_folder = data_path        
         self.validate_path(self.root_folder, f"Incorrect data_path supplied. Expected a directory, {self.root_folder} is not a directory.")
         
-        self.image_paths = self.get_image_paths(self.root_folder)
         self.num_channels = num_channels
         self.transform_image = transform_image
         self.transform_seg = transform_seg
         self.is_segmentation = is_segmentation
+        self.img_depth = img_depth
+        self.crop_depth = crop_depth
+        self.is_train = is_train
+
+        self.image_paths = self.get_image_paths(self.root_folder)
+        self.slices = self.get_slices(self.image_paths)
 
     def __len__(self):
         return len(self.image_paths)
+    
+    def get_slices(self, img_paths):
+        if self.is_train:
+            slices = [slice_start for slice_start in range(self.img_depth - self.crop_depth + 1)] * len(img_paths)
+        else:
+            slices = [0] * len(img_paths)
+        return slices
 
     def get_image_paths(self, dir: str) -> List[str]:
         image_paths = []
         for fname in os.listdir(dir):
             if fname.split('.')[-1] != 'tif':
                 continue 
-            image_paths.append(os.path.join(dir, fname))
+            if self.is_train:
+                image_paths.extend([os.path.join(dir, fname)] * (self.img_depth - self.crop_depth + 1))
+            else:
+                image_paths.append(os.path.join(dir, fname))
 
         if len(image_paths) == 0:
             raise ValueError(f"Expected tif files in the path: {dir}, but found noen.")
@@ -100,7 +118,7 @@ class CellDataset(Dataset):
 
     def __getitem__(self, index):
         img_path = self.image_paths[index]
-        img = skimage.io.imread(img_path)
+        img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
         img = self.normalize_img(img)
