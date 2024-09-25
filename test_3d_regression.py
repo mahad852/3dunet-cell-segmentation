@@ -52,15 +52,11 @@ def get_mito_masks(imgs: np.ndarray):
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
     return torch.Tensor(masks)
 
-def get_mito_masks_custom(imgs: np.ndarray):
-    masks = np.zeros(shape=imgs.shape)
-    for i, img in enumerate(imgs):
-        for z in range(len(img[0])):
-            masks[i][0][z] = img[0][z] >= (threshold_otsu(img[0][z]) * 1.2)
-    return torch.Tensor(masks)
-
 def denoise_img(img):
     return img * (img > 5)
+
+def scale_image(img, max_val = 65535):
+    return ((img - img.min())/(img.max() - img.min())) * max_val
 
 def remove_zeros(img):
     img[img < 0] = 0
@@ -114,7 +110,7 @@ def main():
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
                 out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
-                out_img = remove_zeros(output[0])
+                out_img = scale_image(output[0])
                 print((out_img < 0).any(), out_img.max(), out_img.min())
 
                 tifffile.imwrite(out_file, (out_img * 65535).cpu().numpy().astype(np.uint16))
@@ -122,7 +118,7 @@ def main():
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
-            out_masks = get_mito_masks_custom(val_outputs.detach().cpu().numpy())
+            out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
 
             iou_metric(y_pred=out_masks, y=val_masks)
 
