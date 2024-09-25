@@ -64,10 +64,8 @@ def main():
     val_loader = DataLoader(val_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
 
     iou_metric = MeanIoU(include_background=True, reduction="mean")
-    post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
 
     loss_function = torch.nn.MSELoss()
-
 
     # create UNet, DiceLoss and Adam optimizer
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -82,7 +80,6 @@ def main():
 
     model.load_state_dict(torch.load('best_loss_model_regression_composite.pth', map_location=device, weights_only=True))
     
-
     model.eval()
     val_loss = 0
     vaL_samples = 0
@@ -92,7 +89,7 @@ def main():
         val_labels = None
         val_outputs = None
         for val_data in val_loader:
-            val_images, val_labels, img_pths = val_data[0].to(device), val_data[1].to(device)
+            val_images, val_labels, img_pths = val_data[0].to(device), val_data[1].to(device), val_data[2]
             roi_size = (16, 512, 512)
             sw_batch_size = 4
             val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
