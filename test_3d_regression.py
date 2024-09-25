@@ -50,6 +50,7 @@ def get_mito_masks(imgs: np.ndarray):
     masks = np.zeros(shape=imgs.shape)
     for i, img in enumerate(imgs):
         for z in range(len(img[0])):
+            print(img.shape)
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
     return masks
 
