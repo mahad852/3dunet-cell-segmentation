@@ -111,7 +111,7 @@ def main():
                 out_img = remove_zeros(output[0])
                 print((out_img < 0).any(), out_img.max(), out_img.min())
 
-                tifffile.imwrite(out_file, (out_img * 65535).cpu().numpy().astype(np.int16))
+                tifffile.imwrite(out_file, (out_img * 65535).cpu().numpy().astype(np.uint16))
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
