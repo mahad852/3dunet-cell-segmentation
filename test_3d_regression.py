@@ -51,7 +51,7 @@ def get_mito_masks(imgs: np.ndarray):
     for i, img in enumerate(imgs):
         for z in range(len(img[0])):
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
-    return masks
+    return torch.Tensor(masks)
 
 def main():
     monai.config.print_config()
@@ -100,8 +100,6 @@ def main():
 
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
             out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
-
-            val_masks = [val_mask for val_mask in val_masks]
 
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
