@@ -68,11 +68,7 @@ class CellDataset(Dataset):
         return img >= threshold_otsu(img)
         
     def get_mito_mask(self, img: np.ndarray):
-        mask = np.zeros(shape=img[1].shape)
-        img = img[1]
-        for z in range(len(mask)):
-            mask[z] = img[z] > threshold_otsu(img[z])
-        return mask
+        return img[1] >= threshold_otsu(img[1])
         
     def get_tub_mask(self, img):
         return img[0] >= threshold_otsu(img[0])
@@ -111,7 +107,7 @@ class CellDataset(Dataset):
     def get_item_for_multichannel(self, img : np.ndarray):
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         labels = self.get_labels(img) == 2 if self.is_segmentation else (self.get_mito_image(img) / 255).astype(np.float32)
-        return self.convert_image_to_single_channel(img) / 256, labels
+        return self.convert_image_to_single_channel(img) / 255, labels
     
     def get_item_for_single_channel(self, img : np.ndarray):
         return self.denoise_img(img), self.get_labels(img)
