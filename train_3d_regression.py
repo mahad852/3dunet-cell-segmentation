@@ -159,7 +159,7 @@ def main():
                     print("saved new best metric model")
                 print(
                     "current epoch: {} current mean loss: {:.4f} current rmse: {:.4f} best mean loss: {:.4f} best rmse: {:.4f}; lr: {:.8f} at epoch {}".format(
-                        epoch + 1, val_loss, np.sqrt(val_loss), best_loss, np.sqrt(best_loss), best_loss_epoch, optimizer.param_groups[0]["lr"]
+                        epoch + 1, val_loss, np.sqrt(val_loss), best_loss, np.sqrt(best_loss), optimizer.param_groups[0]["lr"], best_loss_epoch
                     )
                 )
                 writer.add_scalar("val_mean_loss", val_loss, epoch + 1)
