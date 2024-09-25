@@ -97,7 +97,7 @@ def main():
     loss_function = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 
-    num_epochs = 1000
+    num_epochs = 10000
     # start a typical PyTorch training
     val_interval = 1
     best_loss = 2 ** 31
@@ -158,8 +158,8 @@ def main():
                     torch.save(model.state_dict(), "best_loss_model_regression_composite.pth")
                     print("saved new best metric model")
                 print(
-                    "current epoch: {} current mean loss: {:.4f} current rmse: {:.4f} best mean loss: {:.4f} best rmse: {:.4f} at epoch {}".format(
-                        epoch + 1, val_loss, np.sqrt(val_loss), best_loss, np.sqrt(best_loss), best_loss_epoch
+                    "current epoch: {} current mean loss: {:.4f} current rmse: {:.4f} best mean loss: {:.4f} best rmse: {:.4f}; lr: {:.8f} at epoch {}".format(
+                        epoch + 1, val_loss, np.sqrt(val_loss), best_loss, np.sqrt(best_loss), best_loss_epoch, optimizer.param_groups[0]["lr"]
                     )
                 )
                 writer.add_scalar("val_mean_loss", val_loss, epoch + 1)
