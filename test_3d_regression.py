@@ -53,7 +53,9 @@ def get_mito_masks(imgs: np.ndarray):
     return torch.Tensor(masks)
 
 def denoise_img(img):
-    return img * (img > 5)
+    for i in range(len(img)):
+        img[i] *= (img[i] > threshold_otsu(img[i]))
+    return img
 
 def scale_image(img, max_val = 65535):
     return ((img - img.min())/(img.max() - img.min())) * max_val
