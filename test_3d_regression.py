@@ -127,8 +127,8 @@ def main():
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
-            val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
-            out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
+            val_masks = get_mito_masks_custom(val_labels.detach().cpu().numpy())
+            out_masks = get_mito_masks_custom(val_outputs.detach().cpu().numpy())
 
             iou_metric(y_pred=out_masks, y=val_masks)
 
