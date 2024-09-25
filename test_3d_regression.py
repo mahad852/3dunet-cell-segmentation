@@ -53,6 +53,9 @@ def get_mito_masks(imgs: np.ndarray):
             masks[i][0][z] = img[0][z] >= threshold_otsu(img[0][z])
     return torch.Tensor(masks)
 
+def denoise_img(img):
+    return img * (img > 5)
+
 def main():
     monai.config.print_config()
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -104,7 +107,7 @@ def main():
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
                 out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
-                tifffile.imwrite(out_file, (output[0] * 65536).cpu().numpy().astype(np.int16), imagej=True)
+                tifffile.imwrite(out_file, denoise_img((output[0] * 255).cpu().numpy().astype(np.uint8)))
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
