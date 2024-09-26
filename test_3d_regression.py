@@ -64,7 +64,7 @@ def denoise_img(img):
     # for i in range(len(img)):
     #     img[i] *= (img[i] > threshold_otsu(img[i]))
     # return img
-    return img * (img > 1000)
+    return img * (img > 4000)
 
 def scale_image(img, max_val = 65535):
     return ((img - img.min())/(img.max() - img.min())) * max_val
