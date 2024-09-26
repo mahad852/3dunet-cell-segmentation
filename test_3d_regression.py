@@ -64,7 +64,7 @@ def denoise_img(img):
     # for i in range(len(img)):
     #     img[i] *= (img[i] > threshold_otsu(img[i]))
     # return img
-    return img * (img > threshold_otsu(img))
+    return img * (img > 1000)
 
 def scale_image(img, max_val = 65535):
     return ((img - img.min())/(img.max() - img.min())) * max_val
@@ -81,7 +81,7 @@ def main():
     val_imtrans = Compose([AddChannel()])#, ScaleIntensity()])
     val_segtrans = Compose([AddChannel()])
    
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=False, is_train=False)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=False, is_train=False)
     val_loader = DataLoader(val_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
 
     iou_metric = MeanIoU(include_background=True, reduction="mean")
