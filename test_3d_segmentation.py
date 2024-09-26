@@ -49,7 +49,7 @@ def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
-    val_imtrans = Compose([AddChannel(), ScaleIntensity()])
+    val_imtrans = Compose([AddChannel()])
     val_segtrans = Compose([AddChannel()])
 
     # define image dataset, data loader
