@@ -55,7 +55,7 @@ def main():
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True, is_train=False)
     # val_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=val_imtrans, transform_seg=val_segtrans, is_train=False)
     val_loader = DataLoader(val_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
 
@@ -74,7 +74,7 @@ def main():
         num_res_units=2,
     ).to(device)
 
-    model.load_state_dict(torch.load('best_metric_model_segmentation3d_array_trained.pth', map_location=device, weights_only=True))
+    model.load_state_dict(torch.load('best_metric_model_segmentation3d_composite.pth', map_location=device, weights_only=True))
     
     writer = SummaryWriter()
     
@@ -86,23 +86,18 @@ def main():
         val_labels = None
         val_outputs = None
         for val_data in val_loader:
-            val_images, val_labels = val_data[0].to(device), val_data[1].to(device)
+            val_images, val_labels, image_paths = val_data[0].to(device), val_data[1].to(device), val_data[2]
             roi_size = (16, 512, 512)
             sw_batch_size = 4
             val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
             val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
 
-            for label, output in zip(val_labels, val_outputs):
+            for label, output, img_path in zip(val_labels, val_outputs, image_paths):
                 label, output = label.cpu().detach().numpy(), output.cpu().detach().numpy()
-                label_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_label.tiff"
-                output_fname = f"/home/mali2/datasets/CellSeg/generated/{image_index}_output.tiff"
 
-                label = (label[0] * 255).astype(np.float32)
+                output_fname = f"/home/mali2/datasets/CellSeg/generated/seg/{img_path.split('/')[-1]}"
                 output = output[0] * 255
 
-                print(np.unique(output), np.unique(label), output.dtype, label.dtype, label.shape, output.shape)
-
-                tifffile.imwrite(label_fname, label)
                 tifffile.imwrite(output_fname, output)
                 image_index += 1
 
