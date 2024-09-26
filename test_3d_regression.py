@@ -124,7 +124,7 @@ def main():
 
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
-                out_file = f"/home/mali2/datasets/CellSeg/generated/{fname}"
+                out_file = f"/home/mali2/datasets/CellSeg/generated/reg/reg{fname}"
                 tifffile.imwrite(out_file, denoise_img(scale_image(output[0]).cpu().numpy()).astype(np.uint16))
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)

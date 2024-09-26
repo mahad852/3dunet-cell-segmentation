@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 
-from typing import List
+from typing import List, Tuple
 
 import os
 
@@ -112,7 +112,7 @@ class CellDataset(Dataset):
     def get_item_for_single_channel(self, img : np.ndarray):
         return self.denoise_img(img), self.get_labels(img)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
         img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
 

@@ -95,7 +95,7 @@ def main():
             for label, output, img_path in zip(val_labels, val_outputs, image_paths):
                 label, output = label.cpu().detach().numpy(), output.cpu().detach().numpy()
 
-                output_fname = f"/home/mali2/datasets/CellSeg/generated/seg/{img_path.split('/')[-1]}"
+                output_fname = f"/home/mali2/datasets/CellSeg/generated/seg/seg{img_path.split('/')[-1]}"
                 output = output[0] * 255
 
                 tifffile.imwrite(output_fname, output)
