@@ -110,7 +110,10 @@ class CellDataset(Dataset):
         return self.convert_image_to_single_channel(img) / 255, labels
     
     def get_item_for_single_channel(self, img : np.ndarray):
-        return self.denoise_img(img), self.get_labels(img)
+        img = self.scale_image(img) / 255
+        labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
+
+        return self.denoise_img(img), labels
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]

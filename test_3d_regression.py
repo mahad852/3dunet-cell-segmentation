@@ -81,7 +81,7 @@ def main():
     val_imtrans = Compose([AddChannel()])#, ScaleIntensity()])
     val_segtrans = Compose([AddChannel()])
    
-    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=False, is_train=False)
+    val_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved/Mitochondria Channel', num_channels=1, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=False, is_train=False)
     val_loader = DataLoader(val_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
 
     iou_metric = MeanIoU(include_background=True, reduction="mean")
@@ -112,9 +112,6 @@ def main():
         for val_data in val_loader:
             val_images, val_labels, img_pths = val_data[0].to(device), val_data[1].to(device), val_data[2]
             
-            # val_images = val_images[:, :, 10:16, :, :]
-            # val_labels = val_labels[:, :, 10:16, :, :]
-
             roi_size = (16, 512, 512)
             sw_batch_size = 4
             val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
