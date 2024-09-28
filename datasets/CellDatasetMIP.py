@@ -10,14 +10,13 @@ import numpy as np
 
 from skimage.filters import threshold_otsu, threshold_sauvola, threshold_triangle
 
-class CellDataset(Dataset):
+class CellDatasetMIP(Dataset):
     def __init__(self, 
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
                  num_channels = 2,
                  transform_image = None,
                  transform_seg = None,
                  is_segmentation=True,
-                 is_train = True,
                  img_depth = 26,
                  crop_depth = 16):
 
@@ -30,30 +29,18 @@ class CellDataset(Dataset):
         self.is_segmentation = is_segmentation
         self.img_depth = img_depth
         self.crop_depth = crop_depth
-        self.is_train = is_train
 
         self.image_paths = self.get_image_paths(self.root_folder)
-        self.slices = self.get_slices(self.image_paths)
 
     def __len__(self):
         return len(self.image_paths)
     
-    def get_slices(self, img_paths):
-        if self.is_train:
-            slices = [slice_start for slice_start in range(self.img_depth - self.crop_depth + 1)] * len(img_paths)
-        else:
-            slices = [0] * len(img_paths)
-        return slices
-
     def get_image_paths(self, dir: str) -> List[str]:
         image_paths = []
         for fname in os.listdir(dir):
             if fname.split('.')[-1] != 'tif':
                 continue 
-            if self.is_train:
-                image_paths.extend([os.path.join(dir, fname)] * (self.img_depth - self.crop_depth + 1))
-            else:
-                image_paths.append(os.path.join(dir, fname))
+            image_paths.append(os.path.join(dir, fname))
 
         if len(image_paths) == 0:
             raise ValueError(f"Expected tif files in the path: {dir}, but found noen.")
@@ -65,16 +52,19 @@ class CellDataset(Dataset):
             raise ValueError(error_msg)
         
     def get_mask_for_single_channel_img(self, img):
-        return img >= threshold_otsu(img)
+        mip = np.max(img, axis=0)
+        return mip >= threshold_otsu(mip)
         
     def get_mito_mask(self, img: np.ndarray):
-        return img[1] >= threshold_otsu(img[1])
+        mito_mip = np.max(img[1], axis=0)
+        return mito_mip >= threshold_otsu(mito_mip)
         
     def get_tub_mask(self, img):
-        return img[0] >= threshold_otsu(img[0])
+        tub_mip = np.max(img[0], axis=0)
+        return tub_mip >= threshold_otsu(tub_mip)
     
     def get_labels(self, img):
-        labels = np.zeros(shape = img.shape[-3:], dtype=np.int64)
+        labels = np.zeros(shape = img.shape[-2:], dtype=np.int64)
         if self.num_channels == 1:
             mask = self.get_mask_for_single_channel_img(img)
             labels[mask.nonzero()] = 1
@@ -103,7 +93,7 @@ class CellDataset(Dataset):
         return img_cpy.mean(axis=0)
     
     def get_mito_image(self, img):
-        return self.scale_image(img[1])
+        return np.max(self.scale_image(img[1]), axis=0)
     
     def get_item_for_multichannel(self, img : np.ndarray):
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
@@ -112,16 +102,17 @@ class CellDataset(Dataset):
     
     def get_item_for_single_channel(self, img : np.ndarray):
         img = self.scale_image(img) / 255
-        labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
+        labels = self.get_labels(img) if self.is_segmentation else np.max(img, axis=0).astype(np.float32)
 
         return self.denoise_img(img), labels
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
-        img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
+        img = skimage.io.imread(img_path)
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
         img = self.normalize_img(img)
+        img = np.max(img, axis=0)
 
         if self.transform_image:
             img = self.transform_image(img)
