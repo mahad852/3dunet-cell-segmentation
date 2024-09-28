@@ -95,17 +95,17 @@ class CellDataset(Dataset):
         return img * (255/img.max())
     
     def convert_image_to_single_channel(self, img: np.ndarray):
-        img_cpy = np.zeros(img.shape[1:])
-        for c in range(len(img)):
-            img_cpy += (1/img[c].mean() * img[c])
-
-        return self.scale_image(img_cpy)
-
-        # img_cpy = np.zeros(img.shape)
+        # img_cpy = np.zeros(img.shape[1:])
         # for c in range(len(img)):
-        #     img_cpy[c] = self.scale_image(img[c])
+        #     img_cpy += (1/img[c].mean() * img[c])
 
-        # return img_cpy.mean(axis=0)
+        # return self.scale_image(img_cpy)
+
+        img_cpy = np.zeros(img.shape)
+        for c in range(len(img)):
+            img_cpy[c] = self.scale_image(img[c])
+
+        return img_cpy.mean(axis=0)
     
     def get_mito_image(self, img):
         return self.scale_image(img[1])
