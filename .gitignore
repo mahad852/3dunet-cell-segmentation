@@ -3,3 +3,5 @@ checkpoints/*
 .DS_Store
 data_analysis.py
 *.png
+*.tif
+*.tiff
