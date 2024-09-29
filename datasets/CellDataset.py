@@ -122,7 +122,7 @@ class CellDataset(Dataset):
             weights = np.ones(img.shape[1:])
             weights[tub_mask.nonzero()] = 2
             weights[overlap_mask.nonzero()] = 3
-            return weights/weights.sum()
+            return weights
             
             # weights = (img[0] * 2 + img[1])
             # return weights/weights.sum()
