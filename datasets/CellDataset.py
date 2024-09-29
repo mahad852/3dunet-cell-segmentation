@@ -91,15 +91,20 @@ class CellDataset(Dataset):
     def denoise_img(self, img):
         return img * (img > threshold_otsu(img))
     
-    def scale_image(self, img):
-        return img * (255/img.max())
+    def scale_image(self, img: np.ndarray):
+        return ((img - img.min())/(img.max() - img.min())) * 255
     
     def convert_image_to_single_channel(self, img: np.ndarray):
-        img_cpy = np.zeros(img.shape[1:])
-        for c in range(len(img)):
-            img_cpy += (1/img[c].mean() * img[c])
+        # img_cpy = np.zeros(img.shape[1:])
+        # for c in range(len(img)):
+            # img_cpy += (1/img[c].mean() * img[c])
+        # return self.scale_image(img_cpy)
 
-        return self.scale_image(img_cpy)
+        img_cpy = np.zeros(img.shape)
+        for c in range(len(img_cpy)):
+            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
+
+        return img_cpy.max(axis=0)
 
         # img_cpy = np.zeros(img.shape)
         # for c in range(len(img)):
