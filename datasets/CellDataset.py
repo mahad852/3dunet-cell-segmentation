@@ -117,7 +117,7 @@ class CellDataset(Dataset):
     
     def get_item_for_multichannel(self, img : np.ndarray):
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
-        labels = self.get_labels(img) == 2 if self.is_segmentation else (self.get_mito_image(img) / 255).astype(np.float32)
+        labels = self.get_labels(img) == 2 if self.is_segmentation else self.denoise_img(self.get_mito_image(img) / 255).astype(np.float32)
         return self.convert_image_to_single_channel(img), labels
     
     def get_item_for_single_channel(self, img : np.ndarray):
