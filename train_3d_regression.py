@@ -43,7 +43,7 @@ class AddChannel(object):
 
 
 def weighted_mse(output, pred, weights):
-    return torch.sum(torch.square(pred - output) * weights)
+    return torch.mean(torch.square(pred - output) * weights)
 
 def main():
     monai.config.print_config()
