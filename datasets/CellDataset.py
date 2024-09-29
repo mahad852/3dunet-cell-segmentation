@@ -120,6 +120,7 @@ class CellDataset(Dataset):
             mito_mask = self.get_mito_mask(img)
             overlap_mask = mito_mask & tub_mask
             weights = np.ones(img.shape[1:])
+            return weights
             weights[overlap_mask.nonzero()] = 5
             return weights
             
