@@ -43,6 +43,7 @@ class AddChannel(object):
 
 
 def weighted_mse(output, pred, weights):
+    print(weights.sum(), weights)
     return torch.mean(torch.square(pred - output))
 
 def main():
