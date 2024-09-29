@@ -116,12 +116,15 @@ class CellDataset(Dataset):
         if self.num_channels == 1:
             return np.ones(shape=img.shape) / (img.shape[0] * img.shape[1] * img.shape[2])
         else:
-            tub_mask = self.get_tub_mask(img)
-            mito_mask = self.get_mito_mask(img)
-            overlap_mask = mito_mask & tub_mask
-            weights = np.ones(img.shape[1:])
-            weights[tub_mask.nonzero()] = 2
-            weights[overlap_mask.nonzero()] = 3
+            # tub_mask = self.get_tub_mask(img)
+            # mito_mask = self.get_mito_mask(img)
+            # overlap_mask = mito_mask & tub_mask
+            # weights = np.ones(img.shape[1:])
+            # weights[tub_mask.nonzero()] = 2
+            # weights[overlap_mask.nonzero()] = 3
+            # return weights/weights.sum()
+            
+            weights = (img[0] * 2 + img[1])
             return weights/weights.sum()
 
     def get_mito_image(self, img: np.ndarray) -> np.ndarray:
