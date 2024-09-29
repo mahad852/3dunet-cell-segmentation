@@ -124,14 +124,14 @@ class CellDataset(Dataset):
         img = self.scale_image(img) / 255
         labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
 
-        return self.normalize_img(self.denoise_img(img)), labels
+        return self.denoise_img(img), labels
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
         img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        # img = self.normalize_img(img)
+        img = self.normalize_img(img)
 
         if self.transform_image:
             img = self.transform_image(img)
