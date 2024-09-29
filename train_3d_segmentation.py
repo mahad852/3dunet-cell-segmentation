@@ -69,8 +69,8 @@ def main():
     check_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, is_segmentation=True, is_train=True)
     # check_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
     check_loader = DataLoader(check_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
-    im, seg, _ = monai.utils.misc.first(check_loader)
-    print(im.shape, seg.shape)
+    im, seg, weights, _ = monai.utils.misc.first(check_loader)
+    print(im.shape, seg.shape, weights.shape)
 
     # create a training data loader
     train_ds = CellDataset(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, transform_image=train_imtrans, transform_seg=train_segtrans, is_segmentation=True, is_train=True)
