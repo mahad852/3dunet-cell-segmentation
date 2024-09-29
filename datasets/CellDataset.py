@@ -102,7 +102,7 @@ class CellDataset(Dataset):
 
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
+            img_cpy[c] = self.normalize_img(self.denoise_img(img[c]))
 
         return img_cpy.max(axis=0)
 
@@ -118,13 +118,13 @@ class CellDataset(Dataset):
     def get_item_for_multichannel(self, img : np.ndarray):
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
         labels = self.get_labels(img) == 2 if self.is_segmentation else (self.get_mito_image(img) / 255).astype(np.float32)
-        return self.convert_image_to_single_channel(img) / 255, labels
+        return self.convert_image_to_single_channel(img), labels
     
     def get_item_for_single_channel(self, img : np.ndarray):
         img = self.scale_image(img) / 255
         labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
 
-        return self.denoise_img(img), labels
+        return self.denoise_img(self.denoise_img(img)), labels
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
