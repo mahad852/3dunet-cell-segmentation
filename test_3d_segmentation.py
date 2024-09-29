@@ -86,7 +86,7 @@ def main():
         val_labels = None
         val_outputs = None
         for val_data in val_loader:
-            val_images, val_labels, image_paths = val_data[0].to(device), val_data[1].to(device), val_data[2]
+            val_images, val_labels, image_paths = val_data[0].to(device), val_data[1].to(device), val_data[3]
             roi_size = (16, 512, 512)
             sw_batch_size = 4
             val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)

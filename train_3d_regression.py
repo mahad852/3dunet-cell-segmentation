@@ -42,6 +42,9 @@ class AddChannel(object):
         return np.expand_dims(arr, axis=0)
 
 
+def weighted_mse(output, pred, weights):
+    return torch.sum(torch.square(pred - output) * weights)
+
 def main():
     monai.config.print_config()
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -94,7 +97,8 @@ def main():
         strides=(2, 2, 2, 2),
         num_res_units=2,
     ).to(device)
-    loss_function = torch.nn.MSELoss()
+    # loss_function = torch.nn.MSELoss()
+    loss_function = weighted_mse
     optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 
     num_epochs = 10000
@@ -113,13 +117,13 @@ def main():
         step = 0
         for batch_data in train_loader:
             step += 1
-            inputs, labels = batch_data[0].to(device), batch_data[1].to(device)
+            inputs, labels, weights = batch_data[0].to(device), batch_data[1].to(device), batch_data[2].to(device)
             optimizer.zero_grad()
             # print(inputs.shape, labels.shape)
             outputs = model(inputs)
             # print(inputs.shape, labels.shape, outputs.shape, labels, outputs)
 
-            loss = loss_function(outputs, labels)
+            loss = loss_function(outputs, labels, weights)
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
@@ -139,12 +143,12 @@ def main():
                 val_labels = None
                 val_outputs = None
                 for val_data in val_loader:
-                    val_images, val_labels = val_data[0].to(device), val_data[1].to(device)
+                    val_images, val_labels, val_weights = val_data[0].to(device), val_data[1].to(device), val_data[2].to(device)
                     roi_size = (16, 512, 512)
                     sw_batch_size = 4
                     val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
 
-                    val_loss += len(val_images) * loss_function(val_outputs.cpu(), val_labels.cpu())
+                    val_loss += len(val_images) * loss_function(val_outputs.cpu(), val_labels.cpu(), val_weights.cpu())
                     vaL_samples += len(val_images)
                     
                 # aggregate the final mean dice result
