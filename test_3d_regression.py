@@ -129,7 +129,7 @@ def main():
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
             out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
 
-            iou_metric(y_pred=out_masks[10:16], y=val_masks[10:16])
+            iou_metric(y_pred=out_masks[:, :, 10:16], y=val_masks[:, :, 10:16])
 
         # aggregate the final mean dice result
         val_loss = val_loss/vaL_samples
