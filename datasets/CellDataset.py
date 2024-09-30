@@ -102,7 +102,7 @@ class CellDataset(Dataset):
 
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.scale_image(img[c])
+            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
 
         return img_cpy.max(axis=0)
 
