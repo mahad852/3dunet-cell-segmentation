@@ -69,7 +69,7 @@ def main():
     check_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, is_segmentation=True)
     # check_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
     check_loader = DataLoader(check_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
-    im, seg, _, _ = monai.utils.misc.first(check_loader)
+    im, seg, _ = monai.utils.misc.first(check_loader)
     print(im.shape, seg.shape)
 
     # create a training data loader
