@@ -83,7 +83,7 @@ class CellDatasetMIP(Dataset):
     def convert_image_to_single_channel(self, img: np.ndarray) -> np.ndarray:
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
+            img_cpy[c] = self.scale_image(img[c])
 
         return img_cpy.mean(axis=0)
     
@@ -106,7 +106,6 @@ class CellDatasetMIP(Dataset):
         img = skimage.io.imread(img_path)
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        img = self.normalize_img(img)
         img = np.max(img, axis=0)
 
         if self.transform_image:

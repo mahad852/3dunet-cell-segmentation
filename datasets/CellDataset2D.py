@@ -88,9 +88,9 @@ class CellDataset2D(Dataset):
     def convert_image_to_single_channel(self, img: np.ndarray) -> np.ndarray:
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
+            img_cpy[c] = self.scale_image(img[c])
 
-        return img_cpy.max(axis=0)
+        return img_cpy.mean(axis=0)
                 
     def get_mito_image(self, img: np.ndarray) -> np.ndarray:
         return self.scale_image(img[1])
@@ -100,7 +100,7 @@ class CellDataset2D(Dataset):
         labels = self.get_labels(img) == 2 if self.is_segmentation else self.denoise_img(self.get_mito_image(img) / 255).astype(np.float32)
         return self.convert_image_to_single_channel(img)/255, labels
     
-    def get_item_for_single_channel(self, img : np.ndarray, z: int) -> Tuple[np.ndarray, np.ndarray]:
+    def get_item_for_single_channel(self, img : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         img = self.scale_image(img) / 255
         labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
 

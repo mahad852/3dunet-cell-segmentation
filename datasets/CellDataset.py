@@ -102,7 +102,7 @@ class CellDataset(Dataset):
 
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.scale_image(np.log(img[c] + np.ones(shape=img[c].shape)), max_val=1)
+            img_cpy[c] = self.scale_image(img[c], max_val=1)
 
         return img_cpy.mean(axis=0)
 
