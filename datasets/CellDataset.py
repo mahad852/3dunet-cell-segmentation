@@ -81,9 +81,8 @@ class CellDataset(Dataset):
         else:
             tub_mask = self.get_tub_mask(img)
             mito_mask = self.get_mito_mask(img)
-            non_overlapping_mito_mask = mito_mask & np.logical_not(tub_mask & mito_mask)
             labels[tub_mask.nonzero()] = 1
-            labels[non_overlapping_mito_mask.nonzero()] = 2
+            labels[mito_mask.nonzero()] = 2
         return labels
     
     def normalize_img(self, img: np.ndarray) -> np.ndarray:
@@ -92,8 +91,8 @@ class CellDataset(Dataset):
     def denoise_img(self, img: np.ndarray) -> np.ndarray:
         return img * (img > threshold_otsu(img))
     
-    def scale_image(self, img: np.ndarray) -> np.ndarray:
-        return ((img - img.min())/(img.max() - img.min())) * 255
+    def scale_image(self, img: np.ndarray, max_val = 255) -> np.ndarray:
+        return ((img - img.min())/(img.max() - img.min())) * max_val
     
     def convert_image_to_single_channel(self, img: np.ndarray) -> np.ndarray:
         # img_cpy = np.zeros(img.shape[1:])
@@ -103,7 +102,7 @@ class CellDataset(Dataset):
 
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.normalize_img(img[c])
+            img_cpy[c] = self.scale_image(np.log(img[c] + np.ones(shape=img[c].shape)), max_val=1)
 
         return img_cpy.mean(axis=0)
 
@@ -146,7 +145,7 @@ class CellDataset(Dataset):
         img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
 
         img, labels, weights = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        img = self.normalize_img(img)
+        # img = self.normalize_img(img)
 
         if self.transform_image:
             img = self.transform_image(img)
