@@ -10,7 +10,7 @@ import numpy as np
 
 from skimage.filters import threshold_otsu, threshold_sauvola, threshold_triangle
 
-class CellDataset(Dataset):
+class CellDataset2D(Dataset):
     def __init__(self, 
                  data_path = '/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2',
                  num_channels = 2,
@@ -18,8 +18,7 @@ class CellDataset(Dataset):
                  transform_seg = None,
                  is_segmentation=True,
                  is_train = True,
-                 img_depth = 26,
-                 crop_depth = 16):
+                 img_depth = 26):
 
         self.root_folder = data_path        
         self.validate_path(self.root_folder, f"Incorrect data_path supplied. Expected a directory, {self.root_folder} is not a directory.")
@@ -29,31 +28,23 @@ class CellDataset(Dataset):
         self.transform_seg = transform_seg
         self.is_segmentation = is_segmentation
         self.img_depth = img_depth
-        self.crop_depth = crop_depth
         self.is_train = is_train
 
         self.image_paths = self.get_image_paths(self.root_folder)
-        self.slices = self.get_slices(self.image_paths)
+        self.zs = self.get_zs(self.image_paths)
 
     def __len__(self):
         return len(self.image_paths)
     
-    def get_slices(self, img_paths) -> List[int]:
-        if self.is_train:
-            slices = [slice_start for slice_start in range(self.img_depth - self.crop_depth + 1)] * len(img_paths)
-        else:
-            slices = [0] * len(img_paths)
-        return slices
-
+    def get_zs(self, img_paths) -> List[int]:
+        return [i % self.img_depth for i, _ in enumerate(img_paths)]
+            
     def get_image_paths(self, dir: str) -> List[str]:
         image_paths = []
         for fname in os.listdir(dir):
             if fname.split('.')[-1] != 'tif':
                 continue 
-            if self.is_train:
-                image_paths.extend([os.path.join(dir, fname)] * (self.img_depth - self.crop_depth + 1))
-            else:
-                image_paths.append(os.path.join(dir, fname))
+            image_paths.extend([os.path.join(dir, fname)] * self.img_depth)
 
         if len(image_paths) == 0:
             raise ValueError(f"Expected tif files in the path: {dir}, but found noen.")
@@ -81,9 +72,8 @@ class CellDataset(Dataset):
         else:
             tub_mask = self.get_tub_mask(img)
             mito_mask = self.get_mito_mask(img)
-            non_overlapping_mito_mask = mito_mask & np.logical_not(tub_mask & mito_mask)
             labels[tub_mask.nonzero()] = 1
-            labels[non_overlapping_mito_mask.nonzero()] = 2
+            labels[mito_mask.nonzero()] = 2
         return labels
     
     def normalize_img(self, img: np.ndarray) -> np.ndarray:
@@ -96,63 +86,38 @@ class CellDataset(Dataset):
         return ((img - img.min())/(img.max() - img.min())) * 255
     
     def convert_image_to_single_channel(self, img: np.ndarray) -> np.ndarray:
-        # img_cpy = np.zeros(img.shape[1:])
-        # for c in range(len(img)):
-            # img_cpy += (1/img[c].mean() * img[c])
-        # return self.scale_image(img_cpy)
-
         img_cpy = np.zeros(img.shape)
         for c in range(len(img_cpy)):
-            img_cpy[c] = self.normalize_img(img[c])
+            img_cpy[c] = self.scale_image(self.normalize_img(img[c]))
 
-        return img_cpy.mean(axis=0)
-
-        # img_cpy = np.zeros(img.shape)
-        # for c in range(len(img)):
-        #     img_cpy[c] = self.scale_image(img[c])
-
-        # return img_cpy.mean(axis=0)
-    
-    def get_weights(self, img: np.ndarray) -> np.ndarray:
-        if self.num_channels == 1:
-            return np.ones(shape=img.shape) / (img.shape[0] * img.shape[1] * img.shape[2])
-        else:
-            tub_mask = self.get_tub_mask(img)
-            mito_mask = self.get_mito_mask(img)
-            overlap_mask = mito_mask & tub_mask
-            weights = np.ones(img.shape[1:])
-            return weights
-            weights[overlap_mask.nonzero()] = 5
-            return weights
-            
+        return img_cpy.max(axis=0)
+                
     def get_mito_image(self, img: np.ndarray) -> np.ndarray:
         return self.scale_image(img[1])
     
-    def get_item_for_multichannel(self, img : np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_item_for_multichannel(self, img : np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         img = np.transpose(img, (1, 0, 2, 3)) # Z, C, H, W  ==> C, Z, H, W 
-        weights = self.get_weights(img)
         labels = self.get_labels(img) == 2 if self.is_segmentation else self.denoise_img(self.get_mito_image(img) / 255).astype(np.float32)
-        return self.convert_image_to_single_channel(img), labels, weights
+        return self.convert_image_to_single_channel(img)/255, labels
     
-    def get_item_for_single_channel(self, img : np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        weights = self.get_weights(img)
+    def get_item_for_single_channel(self, img : np.ndarray, z: int) -> Tuple[np.ndarray, np.ndarray]:
         img = self.scale_image(img) / 255
         labels = self.get_labels(img) if self.is_segmentation else img.astype(np.float32)
 
-        return self.denoise_img(img), labels, weights
+        return self.denoise_img(img), labels
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
-        img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
+        img = skimage.io.imread(img_path)
 
-        img, labels, weights = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        img = self.normalize_img(img)
+        img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
+        img = self.normalize_img(img)[self.zs[index]]
+        labels = labels[self.zs[index]]
 
         if self.transform_image:
             img = self.transform_image(img)
 
         if self.transform_seg:
             labels = self.transform_seg(labels)
-            weights = self.transform_seg(weights)
 
-        return img.astype(np.float32), labels, weights, self.image_paths[index]
+        return img.astype(np.float32), labels, self.image_paths[index]
