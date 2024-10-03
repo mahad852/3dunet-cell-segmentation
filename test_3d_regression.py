@@ -122,14 +122,14 @@ def main():
             for output, path in zip(val_outputs.detach().cpu(), img_pths):
                 fname = path.split('/')[-1]
                 out_file = f"/home/mali2/datasets/CellSeg/generated/reg/reg{fname}"
-                tifffile.imwrite(out_file, denoise_img(scale_image(output[0]).cpu().numpy()).astype(np.uint16))
+                tifffile.imwrite(out_file, (scale_image(output[0]).cpu().numpy()).astype(np.uint16))
 
             # print(val_masks, out_masks, val_masks.shape, out_masks.shape)
 
             val_masks = get_mito_masks(val_labels.detach().cpu().numpy())
             out_masks = get_mito_masks(val_outputs.detach().cpu().numpy())
 
-            iou_metric(y_pred=out_masks[:, :, 10:16], y=val_masks[:, :, 10:16])
+            iou_metric(y_pred=out_masks, y=val_masks)
 
         # aggregate the final mean dice result
         val_loss = val_loss/vaL_samples
