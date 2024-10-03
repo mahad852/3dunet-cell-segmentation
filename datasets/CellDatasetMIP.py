@@ -108,6 +108,8 @@ class CellDatasetMIP(Dataset):
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
         img = np.max(img, axis=0)
 
+        img = self.normalize_img(img)
+
         if self.transform_image:
             img = self.transform_image(img)
 
