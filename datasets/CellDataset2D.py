@@ -111,7 +111,7 @@ class CellDataset2D(Dataset):
         img = skimage.io.imread(img_path)
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        img = self.normalize_img(img)[self.zs[index]]
+        img = img[self.zs[index]]
         labels = labels[self.zs[index]]
 
         if self.transform_image:

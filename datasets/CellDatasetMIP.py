@@ -106,7 +106,6 @@ class CellDatasetMIP(Dataset):
         img = skimage.io.imread(img_path)
 
         img, labels = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
-        img = self.normalize_img(img)
         img = np.max(img, axis=0)
 
         if self.transform_image:
