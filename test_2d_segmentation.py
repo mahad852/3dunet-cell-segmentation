@@ -57,8 +57,8 @@ def main():
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
-    # val_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True, is_train=False)
-    val_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True)
+    val_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True, is_train=False)
+    # val_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
     dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
