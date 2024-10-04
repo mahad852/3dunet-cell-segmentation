@@ -77,7 +77,8 @@ def main():
         num_res_units=2,
     ).to(device)
 
-    model.load_state_dict(torch.load('best_metric_model_segmentation2d_composite.pth', map_location=device, weights_only=True))
+    # model.load_state_dict(torch.load('best_metric_model_segmentation2d_composite.pth', map_location=device, weights_only=True))
+    model.load_state_dict(torch.load('best_metric_model_segmentation2d_composite_nmip.pth', map_location=device, weights_only=True))
     
     writer = SummaryWriter()
     
