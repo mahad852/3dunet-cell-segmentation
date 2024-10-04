@@ -67,19 +67,19 @@ def main():
     # define image dataset, data loader
     ####################################### CUSTOM IMPL ###################################################
    
-    check_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, is_segmentation=True)
-    # check_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
+    # check_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, is_segmentation=True)
+    check_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, is_segmentation=True)
     check_loader = DataLoader(check_ds, batch_size=4, num_workers=1, pin_memory=torch.cuda.is_available())
     im, seg, _ = monai.utils.misc.first(check_loader)
     print(im.shape, seg.shape)
 
     # create a training data loader
-    train_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, transform_image=train_imtrans, transform_seg=train_segtrans, is_segmentation=True)
-    # train_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=train_imtrans, transform_seg=train_segtrans, is_train=True)
+    # train_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, transform_image=train_imtrans, transform_seg=train_segtrans, is_segmentation=True)
+    train_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2', num_channels=2, transform_image=train_imtrans, transform_seg=train_segtrans, is_segmentation=True)
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, num_workers=1, pin_memory=torch.cuda.is_available())
 
-    val_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True, is_train=False)
-    # val_ds = AllenCellDataset(data_path='/home/mali2/datasets/CellSeg/AllenCellData', transform_image=val_imtrans, transform_seg=val_segtrans, is_train=False)
+    # val_ds = CellDataset2D(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True, is_train=False)
+    val_ds = CellDatasetMIP(data_path='/home/mali2/datasets/CellSeg/Widefield Deconvolved', num_channels=2, transform_image=val_imtrans, transform_seg=val_segtrans, is_segmentation=True)
     val_loader = DataLoader(val_ds, batch_size=2, num_workers=1, pin_memory=torch.cuda.is_available())
 
 
@@ -161,7 +161,8 @@ def main():
                 if metric > best_metric:
                     best_metric = metric
                     best_metric_epoch = epoch + 1
-                    torch.save(model.state_dict(), "best_metric_model_segmentation2d_composite_nmip.pth")
+                    # torch.save(model.state_dict(), "best_metric_model_segmentation2d_composite_nmip.pth")
+                    torch.save(model.state_dict(), "best_metric_model_segmentation2d_composite.pth")
                     print("saved new best metric model")
                 print(
                     "current epoch: {} current mean IoU: {:.4f} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
