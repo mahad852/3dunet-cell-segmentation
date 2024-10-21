@@ -57,6 +57,7 @@ def get_train_args():
     parser.add_argument("--output-path", default="/home/mali2/datasets/CellSeg/generated", help="output path for storing inference output")
 
     args = parser.parse_args()
+    print(args, vars(args))
     return vars(args)
 
 def get_test_args():
