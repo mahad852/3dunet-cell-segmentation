@@ -1,8 +1,8 @@
 python train.py \
     --mode "3d" \
-    --output-model-path "model/seg_test.pth" \
+    --output_model_path "model/seg_test.pth" \
     --train-ds-path "/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2" \
     --val-ds-path "/home/mali2/datasets/CellSeg/Widefield Deconvolved" \
-    --output-path "/home/mali2/datasets/CellSeg/generated/seg" \
+    --output_path "/home/mali2/datasets/CellSeg/generated/seg" \
 
 
