@@ -16,10 +16,7 @@ def validate_train_args(args):
     
     if not validate_imp(args.input_model_path):
         raise ValueError(f"Incorrect imp argument: {args.input_model_path}; expected None or a valid path")
-    
-    if not validate_path(args.output_model_path):
-        raise ValueError(f"Incorrect omp argument: {args.output_model_path}; expected a valid path")
-    
+        
     if not validate_path(args.train_ds_path):
         raise ValueError(f"Incorrect train-ds-path argument: {args.train_ds_path}; expected a valid path")
     
@@ -32,10 +29,7 @@ def validate_train_args(args):
 def validate_test_args(args):
     if not validate_mode(args.mode):
         raise ValueError(f"Incorrect mode argument: {args.mode}; expected 2d or 3d")
-    
-    if not validate_path(args.input_model_path):
-        raise ValueError(f"Incorrect imp argument: {args.input_model_path}; expected None or a valid path")
-            
+                
     if not validate_path(args.val_ds_path):
         raise ValueError(f"Incorrect val-ds-path argument: {args.val_ds_path}; expected a valid path")
     
