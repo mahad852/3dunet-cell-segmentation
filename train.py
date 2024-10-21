@@ -130,6 +130,7 @@ epoch_loss_values = list()
 metric_values = list()
 writer = SummaryWriter()
 
+print("*" * 10, "Beginning training", "*" * 10)
 
 for epoch in range(num_epochs):
     print("-" * 10)
