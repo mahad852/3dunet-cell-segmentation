@@ -76,10 +76,10 @@ def get_mode(args) -> str:
     return args.mode.lower()
 
 def get_input_model_path(args) -> str|None:
-    return args.imp
+    return args.input_model_path
 
 def get_output_model_path(args) -> str:
-    return args.omp
+    return args.output_model_path
 
 def get_train_ds_path(args) -> str:
     return args.train_ds_path
