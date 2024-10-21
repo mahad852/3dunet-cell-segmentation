@@ -5,7 +5,7 @@ def validate_path(path):
     return isinstance(path, str) and os.path.exists(path)
 
 def validate_mode(mode):
-    return isinstance(mode, str) and mode.lower() not in ["2d", "3d"]
+    return isinstance(mode, str) and mode.lower() in ["2d", "3d"]
 
 def validate_imp(imp):
     return imp == None or validate_path(imp)
@@ -58,7 +58,8 @@ def get_train_args():
 
     args = parser.parse_args()
     validate_train_args(args)
-    return vars(args)
+    
+    return args
 
 def get_test_args():
     parser = argparse.ArgumentParser(description="Arguments for the test script",
@@ -74,7 +75,8 @@ def get_test_args():
 
     args = parser.parse_args()
     validate_test_args(vars(args))
-    return vars(args)
+    
+    return args
 
 def get_mode(args) -> str:
     return args.mode.lower()
