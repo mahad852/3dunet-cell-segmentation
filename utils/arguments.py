@@ -48,7 +48,7 @@ def get_train_args():
     
     parser.add_argument("-m", "--mode", help="Mode 2D or 3D", default="3d")
     parser.add_argument("-imp", "--input-model-path", help="input model path", default=None)
-    parser.add_argument("-omp", "--ouput-model-path", help="output model path", default="models/model.pth")
+    parser.add_argument("-omp", "--output-model-path", help="output model path", default="models/model.pth")
     parser.add_argument("--is-regression", action="store_true", help="is regression or segmentation", default=False)
     parser.add_argument("--is-mip", action="store_true", help="use Max Intensity Projection (MIP)", default=False)
     
