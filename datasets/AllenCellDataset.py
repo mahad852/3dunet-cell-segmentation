@@ -38,7 +38,7 @@ class AllenCellDataset(Dataset):
         return img[center - int(depth/2):center + int(depth/2), :, :]
     
     def separate_channels(self, multi_channel_img):
-        target_to_channel_index = {'mitochondria' : 14}
+        target_to_channel_index = {'mitochondria' : 14, 'microtubule' : 3}
 
         transparent_light = multi_channel_img[:, 2, :, :]
 
@@ -94,23 +94,15 @@ class AllenCellDataset(Dataset):
     def normalize_img(self, img):
         return (img - img.mean())/img.std()
     
-    def denoise_img(self, img):
-        return img * (img > threshold_otsu(img))
-    
     def __getitem__(self, index):        
         tlight, targets = self.separate_channels(self.read_image(image_path=self.image_paths[index]))
 
-        tlight = self.crop_z(self.resize_image(tlight))
-        targets = [self.crop_z(self.resize_image(target)) for target in targets]
-
         tlight = self.normalize_img(tlight)   
-
-        labels = [self.get_labels(target) for target in targets]
 
         if self.transform_image:
             tlight = self.transform_image(tlight)
 
         if self.transform_seg:
-            labels = [self.transform_seg(label) for label in labels]
+            targets = [self.transform_seg(target) for target in targets]
 
-        return tlight, labels[0]
+        return tlight, targets
