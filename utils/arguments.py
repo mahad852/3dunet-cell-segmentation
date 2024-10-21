@@ -49,8 +49,8 @@ def get_train_args():
     parser.add_argument("-m", "--mode", help="Mode 2D or 3D", default="3d")
     parser.add_argument("-imp", "--input-model-path", help="input model path", default=None)
     parser.add_argument("-omp", "--ouput-model-path", help="output model path", default="models/model.pth")
-    parser.add_argument("--is-regression", action="store_true", help="is regression or segmentation")
-    parser.add_argument("--is-mip", action="store_true", help="use Max Intensity Projection (MIP)")
+    parser.add_argument("--is-regression", action="store_true", help="is regression or segmentation", default=False)
+    parser.add_argument("--is-mip", action="store_true", help="use Max Intensity Projection (MIP)", default=False)
     
     parser.add_argument("--train-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2", help="path to the training images")
     parser.add_argument("--val-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved", help="path to the val images")
@@ -65,8 +65,8 @@ def get_test_args():
     
     parser.add_argument("-m", "--mode", help="Mode 2D or 3D", default="3d")
     parser.add_argument("-imp", "--input-model-path", help="input model path")
-    parser.add_argument("--is-regression", action="store_true", help="is regression or segmentation")
-    parser.add_argument("--is-mip", action="store_true", help="use Max Intensity Projection (MIP)")
+    parser.add_argument("--is-regression", action="store_true", help="is regression or segmentation", default=False)
+    parser.add_argument("--is-mip", action="store_true", help="use Max Intensity Projection (MIP)", default=False)
 
     parser.add_argument("--val-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved", help="path to the val images")
     parser.add_argument("--output-path", default="/home/mali2/datasets/CellSeg/generated", help="output path for storing inference output")
