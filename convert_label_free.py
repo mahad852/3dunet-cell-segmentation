@@ -33,11 +33,15 @@ transform_img = transforms.Compose([
 
 root_dir = "/home/mali2/datasets/CellSeg/"
 
+train_ds = AllenCellDataset(os.path.join(root_dir, "AllenCellData"), targets=["microtubule", "mitochondria"], transform_image=transform_img, transform_seg=transform_img)
+val_ds = AllenCellDataset(os.path.join(root_dir, "AllenCellData"), targets=["microtubule", "mitochondria"], transform_image=transform_img, transform_seg=transform_img, is_train=False)
 
-ds = AllenCellDataset(os.path.join(root_dir, "AllenCellData"), targets=["microtubule", "mitochondria"], transform_image=transform_img, transform_seg=transform_img)
-print(len(ds))
+for i, (imputs, labels) in enumerate(train_ds):
+    labels = merge_channels(labels)
+    print(f"Train; Merged: {i}")
+    save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", "train", f"pos{i}.tiff"))
 
-# for i, (imputs, labels) in enumerate(ds):
-#     labels = merge_channels(labels)
-#     print(f"Merged: {i}")
-#     save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", f"pos{i}.tiff"))
+for i, (imputs, labels) in enumerate(val_ds):
+    labels = merge_channels(labels)
+    print(f"Val; Merged: {i}")
+    save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", "val", f"pos{i}.tiff"))

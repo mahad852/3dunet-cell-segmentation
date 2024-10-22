@@ -51,7 +51,7 @@ for i in p1_map.keys():
     print(p2_map[i], p1_map[i])
 
     true_negatives = np.logical_and(np.logical_not(mask1), np.logical_not(mask2)).sum()
-    true_positives = np.logical_and(mask1, mask2)
+    true_positives = (mask1 * mask2).sum()
 
     iou = compute_iou(mask1, mask2)
     ious.append(iou)
