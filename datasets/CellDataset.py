@@ -142,6 +142,7 @@ class CellDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         img_path = self.image_paths[index]
+        print(skimage.io.imread(img_path).shape)
         img = skimage.io.imread(img_path)[self.slices[index] : self.slices[index] + (self.crop_depth if self.is_train else self.img_depth)]
 
         img, labels, weights = self.get_item_for_multichannel(img) if self.num_channels > 1 else self.get_item_for_single_channel(img)
