@@ -10,6 +10,9 @@ def validate_mode(mode):
 def validate_imp(imp):
     return imp == None or validate_path(imp)
 
+def validate_epochs(epochs):
+    return isinstance(epochs, int) and epochs > 0
+
 def validate_train_args(args):
     if not validate_mode(args.mode):
         raise ValueError(f"Incorrect mode argument: {args.mode}; expected 2d or 3d")
@@ -24,7 +27,10 @@ def validate_train_args(args):
         raise ValueError(f"Incorrect val-ds-path argument: {args.val_ds_path}; expected a valid path")
     
     if not validate_path(args.output_path):
-        raise ValueError(f"Incorrect output-path argument: {args.output_path}; expected a valid path")      
+        raise ValueError(f"Incorrect output-path argument: {args.output_path}; expected a valid path")   
+
+    if not validate_epochs(args.epochs):
+        raise ValueError(f"Incorrect value for epochs provided: {args.epochs}; Expected int > 0")   
 
 def validate_test_args(args):
     if not validate_mode(args.mode):
@@ -49,6 +55,8 @@ def get_train_args():
     parser.add_argument("--train-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2", help="path to the training images")
     parser.add_argument("--val-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved", help="path to the val images")
     parser.add_argument("--output-path", default="/home/mali2/datasets/CellSeg/generated", help="output path for storing inference output")
+
+    parser.add_argument("-e", "--epochs", default=500, type=int, help="Number of epochs to train the model")
 
     args = parser.parse_args()
     validate_train_args(args)
@@ -89,6 +97,9 @@ def get_val_ds_path(args) -> str:
 
 def get_output_path(args) -> str:
     return args.output_path
+
+def get_num_epochs(args) -> int:
+    return int(args.epochs)
 
 def is_segmentation(args) -> bool:
     return not args.is_regression

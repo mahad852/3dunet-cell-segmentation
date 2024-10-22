@@ -41,7 +41,7 @@ from datasets.CellDatasetMIP import CellDatasetMIP
 from datasets.AllenCellDataset import AllenCellDataset
 
 from utils.arguments import get_train_args
-from utils.arguments import get_mode, get_input_model_path, get_output_model_path, get_val_ds_path, get_train_ds_path, get_output_path, is_segmentation, is_mip
+from utils.arguments import get_mode, get_input_model_path, get_output_model_path, get_val_ds_path, get_train_ds_path, get_output_path, get_num_epochs, is_segmentation, is_mip
 
 from utils.img_transformations import AddChannel
 
@@ -122,7 +122,7 @@ loss_function = monai.losses.DiceLoss(sigmoid=True) if is_segmentation(args) els
 optimizer = torch.optim.Adam(model.parameters(), 1e-3)
 
 
-num_epochs = 500
+num_epochs = get_num_epochs(args)
 # start a typical PyTorch training
 val_interval = 1
 best_metric = -1
