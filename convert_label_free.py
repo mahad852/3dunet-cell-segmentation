@@ -38,4 +38,5 @@ ds = AllenCellDataset(os.path.join(root_dir, "AllenCellData"), targets=["microtu
 
 for i, (imputs, labels) in enumerate(ds):
     labels = merge_channels(labels)
+    print(f"Merged: {i}")
     save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", f"pos{i}.tiff"))
