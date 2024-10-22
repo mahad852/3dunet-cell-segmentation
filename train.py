@@ -63,6 +63,8 @@ output_path = get_output_path(args)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+print("*" * 10, "Preparing Model...", "*" * 10)
+
 model = monai.networks.nets.UNet(
     spatial_dims=3 if mode == "3d" else 2,
     in_channels=1,
