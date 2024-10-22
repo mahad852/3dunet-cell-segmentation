@@ -35,8 +35,9 @@ root_dir = "/home/mali2/datasets/CellSeg/"
 
 
 ds = AllenCellDataset(os.path.join(root_dir, "AllenCellData"), targets=["microtubule", "mitochondria"], transform_image=transform_img, transform_seg=transform_img)
+print(len(ds))
 
-for i, (imputs, labels) in enumerate(ds):
-    labels = merge_channels(labels)
-    print(f"Merged: {i}")
-    save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", f"pos{i}.tiff"))
+# for i, (imputs, labels) in enumerate(ds):
+#     labels = merge_channels(labels)
+#     print(f"Merged: {i}")
+#     save_image_as_tiff(labels, os.path.join(root_dir, "LabelFreeCust", f"pos{i}.tiff"))
