@@ -54,7 +54,6 @@ def get_train_args():
     
     parser.add_argument("--train-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2", help="path to the training images")
     parser.add_argument("--val-ds-path", default="/home/mali2/datasets/CellSeg/Widefield Deconvolved", help="path to the val images")
-    parser.add_argument("--output-path", default="/home/mali2/datasets/CellSeg/generated", help="output path for storing inference output")
 
     parser.add_argument("-e", "--epochs", default=500, type=int, help="Number of epochs to train the model")
 
