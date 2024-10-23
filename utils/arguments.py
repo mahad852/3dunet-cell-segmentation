@@ -39,9 +39,6 @@ def validate_test_args(args):
     if not validate_path(args.val_ds_path):
         raise ValueError(f"Incorrect val-ds-path argument: {args.val_ds_path}; expected a valid path")
     
-    if not validate_path(args.output_path):
-        raise ValueError(f"Incorrect output-path argument: {args.output_path}; expected a valid path")        
-
 def get_train_args():
     parser = argparse.ArgumentParser(description="Arguments for train script",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
