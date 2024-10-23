@@ -50,3 +50,6 @@ def merge_channels(images: List[np.ndarray]):
         final_img[:, i, :, :] = img
     
     return final_img
+
+def scale_image(img, max_val = 65535):
+    return ((img - img.min())/(img.max() - img.min())) * max_val
