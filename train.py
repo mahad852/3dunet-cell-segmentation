@@ -41,7 +41,7 @@ from datasets.CellDatasetMIP import CellDatasetMIP
 from datasets.AllenCellDataset import AllenCellDataset
 
 from utils.arguments import get_train_args
-from utils.arguments import get_mode, get_input_model_path, get_output_model_path, get_val_ds_path, get_train_ds_path, get_output_path, get_num_epochs, is_segmentation, is_mip
+from utils.arguments import get_mode, get_input_model_path, get_output_model_path, get_val_ds_path, get_train_ds_path, get_num_epochs, is_segmentation, is_mip
 
 from utils.img_transformations import AddChannel
 
@@ -58,8 +58,6 @@ output_model_path = get_output_model_path(args)
 
 train_ds_path = get_train_ds_path(args)
 val_ds_path = get_val_ds_path(args)
-output_path = get_output_path(args)
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

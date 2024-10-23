@@ -26,9 +26,6 @@ def validate_train_args(args):
     if not validate_path(args.val_ds_path):
         raise ValueError(f"Incorrect val-ds-path argument: {args.val_ds_path}; expected a valid path")
     
-    if not validate_path(args.output_path):
-        raise ValueError(f"Incorrect output-path argument: {args.output_path}; expected a valid path")   
-
     if not validate_epochs(args.epochs):
         raise ValueError(f"Incorrect value for epochs provided: {args.epochs}; Expected int > 0")   
 
