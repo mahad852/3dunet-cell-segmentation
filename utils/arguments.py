@@ -75,7 +75,7 @@ def get_test_args():
     parser.add_argument("--output-path", default="/home/mali2/datasets/CellSeg/generated", help="output path for storing inference output")
 
     args = parser.parse_args()
-    validate_test_args(vars(args))
+    validate_test_args(args)
     
     return args
 
