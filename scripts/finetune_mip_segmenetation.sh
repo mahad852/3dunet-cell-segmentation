@@ -5,5 +5,5 @@ python train.py \
     --output-model-path "models/finetuned_seg_mip.pth" \
     --train-ds-path "/home/mali2/datasets/CellSeg/Widefield Deconvolved Set 2" \
     --val-ds-path "/home/mali2/datasets/CellSeg/Widefield Deconvolved" \
-    --epochs 100 \
+    --epochs 300 \
 
