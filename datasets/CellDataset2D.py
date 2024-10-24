@@ -42,7 +42,7 @@ class CellDataset2D(Dataset):
     def get_image_paths(self, dir: str) -> List[str]:
         image_paths = []
         for fname in os.listdir(dir):
-            if fname.split('.')[-1] != 'tif':
+            if fname.split('.')[-1] not in ['tif', "tiff"]:
                 continue 
             image_paths.extend([os.path.join(dir, fname)] * self.img_depth)
 
