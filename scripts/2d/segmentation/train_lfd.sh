@@ -3,4 +3,4 @@ python train.py \
     --output-model-path "models/2d/segmentation/lfd.pth" \
     --train-ds-path "/home/mali2/datasets/CellSeg/LabelFreeCust/train" \
     --val-ds-path "/home/mali2/datasets/CellSeg/LabelFreeCust/val" \
-    --epochs 50
+    --epochs 10
